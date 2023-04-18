@@ -3,17 +3,45 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@nomiclabs/hardhat-etherscan'
 import 'hardhat-watcher'
-import "@matterlabs/hardhat-zksync-deploy"
-import "@matterlabs/hardhat-zksync-solc"
+import '@matterlabs/hardhat-zksync-solc'
+import { subtask } from 'hardhat/config'
+import { ZkSolcConfig } from '@matterlabs/hardhat-zksync-solc/dist/src/types'
+import * as path from 'path'
+import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
+
+const CONTRACTS_USES_LIBRARIES = [
+  'NonfungibleTokenPositionDescriptor.sol',
+  'test/NFTDescriptorTest.sol',
+];
+
+let zksolc_config: ZkSolcConfig = {
+  version: "1.3.8",
+  compilerSource: "binary",
+  settings: {},
+};
+
+if(process.env.NFT_DESCRIPTOR_ADDRESS) {
+  zksolc_config.settings.libraries = {
+    "contracts/libraries/NFTDescriptor.sol": {
+      NFTDescriptor: process.env.NFT_DESCRIPTOR_ADDRESS,
+    },
+  }
+} else {
+  subtask(
+      TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
+      async (_, { config }, runSuper) => {
+        const paths = await runSuper();
+
+        return paths
+            .filter((solidityFilePath: any) => {
+              const relativePath = path.relative(config.paths.sources, solidityFilePath);
+              return !CONTRACTS_USES_LIBRARIES.includes(relativePath);
+            })
+      }
+  );
+}
 
 export default {
-  zksolc: {
-    version: "1.3.8",
-    compilerSource: "binary",
-    settings: {},
-  },
-  defaultNetwork: "zkSyncTestnet",
-
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
@@ -53,6 +81,7 @@ export default {
     settings: {
       optimizer: {
         enabled: true,
+        // will be ignored by zksolc
         runs: 1_000_000,
       },
       metadata: {
@@ -60,6 +89,7 @@ export default {
       },
     },
   },
+  zksolc: zksolc_config,
   watcher: {
     test: {
       tasks: [{ command: 'test', params: { testFiles: ['{path}'] } }],
