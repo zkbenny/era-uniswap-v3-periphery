@@ -6,7 +6,6 @@ import 'hardhat-watcher'
 import '@matterlabs/hardhat-zksync-solc'
 import '@matterlabs/hardhat-zksync-verify'
 import { subtask } from 'hardhat/config'
-import { ZkSolcConfig } from '@matterlabs/hardhat-zksync-solc/dist/src/types'
 import * as path from 'path'
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
 
@@ -14,17 +13,6 @@ const CONTRACTS_USES_LIBRARIES = [
   'NonfungibleTokenPositionDescriptor.sol',
   'test/NFTDescriptorTest.sol',
 ];
-
-// TODO: replace with ZkSolcConfig after hardhat-zksync-solc update
-let zksolc_config: any = {
-  version: "1.3.10",
-  compilerSource: "binary",
-  settings: {
-    metadata: {
-      bytecodeHash: 'none',
-    },
-  },
-}
 
 subtask(
   TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS,
@@ -87,7 +75,15 @@ export default {
       },
     },
   },
-  zksolc: zksolc_config,
+  zksolc: {
+    version: "1.3.10",
+    compilerSource: "binary",
+    settings: {
+      metadata: {
+        bytecodeHash: 'none',
+      },
+    },
+  },
   watcher: {
     test: {
       tasks: [{ command: 'test', params: { testFiles: ['{path}'] } }],
