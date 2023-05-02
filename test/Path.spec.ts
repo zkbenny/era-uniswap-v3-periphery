@@ -1,4 +1,3 @@
-import { waffle, ethers } from 'hardhat'
 import { FeeAmount } from './shared/constants'
 
 import { expect } from './shared/expect'
@@ -7,9 +6,11 @@ import { PathTest } from '../typechain'
 import { decodePath, encodePath } from './shared/path'
 
 import snapshotGasCost from './shared/snapshotGasCost'
+import { deployContract, getWallets } from './shared/zkSyncUtils'
+import { Wallet } from 'zksync-web3'
 
 describe('Path', () => {
-  const wallets = waffle.provider.getWallets()
+  const wallets = getWallets()
 
   let path: PathTest
 
@@ -20,19 +21,12 @@ describe('Path', () => {
   ]
   let fees = [FeeAmount.MEDIUM, FeeAmount.MEDIUM]
 
-  const pathTestFixture = async () => {
-    const pathTestFactory = await ethers.getContractFactory('PathTest')
-    return (await pathTestFactory.deploy()) as PathTest
+  async function pathTestFixture([wallet]: Wallet[]) {
+    return (await deployContract(wallet, 'PathTest')) as PathTest
   }
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(wallets)
-  })
-
   beforeEach('deploy PathTest', async () => {
-    path = await loadFixture(pathTestFixture)
+    path = await pathTestFixture(wallets)
   })
 
   it('js encoding works as expected', async () => {

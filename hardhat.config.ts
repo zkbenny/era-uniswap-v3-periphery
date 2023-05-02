@@ -8,7 +8,9 @@ import { subtask } from 'hardhat/config'
 import * as path from 'path'
 import { TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS } from 'hardhat/builtin-tasks/task-names'
 
-const CONTRACTS_USES_LIBRARIES = [
+const NFT_DESCRIPTOR_PATH = 'contracts/libraries/NFTDescriptor.sol'
+const NFT_DESCRIPTOR_NAME = 'NFTDescriptor'
+const CONTRACTS_USES_NFT_DESCRIPTOR = [
   'NonfungibleTokenPositionDescriptor.sol',
   'test/NFTDescriptorTest.sol',
 ]
@@ -18,10 +20,17 @@ subtask(
   async (_, { config }, runSuper) => {
     const paths = await runSuper()
 
+    if (config.zksolc.settings.libraries !== undefined) {
+      if (config.zksolc.settings.libraries[NFT_DESCRIPTOR_PATH] !== undefined) {
+        if (config.zksolc.settings.libraries[NFT_DESCRIPTOR_PATH][NFT_DESCRIPTOR_NAME] !== undefined) {
+          return paths;
+        }
+      }
+    }
     return paths
       .filter((solidityFilePath: any) => {
         const relativePath = path.relative(config.paths.sources, solidityFilePath)
-        return !CONTRACTS_USES_LIBRARIES.includes(relativePath)
+        return !CONTRACTS_USES_NFT_DESCRIPTOR.includes(relativePath)
       })
   }
 )
@@ -45,6 +54,11 @@ export default {
     },
     kovan: {
       url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
+    },
+    zkSyncLocalhost: {
+      url: "http://localhost:3050",
+      ethNetwork: "http://localhost:8545",
+      zksync: true,
     },
     zkSyncTestnet: {
       url: "https://testnet.era.zksync.dev",
@@ -78,5 +92,8 @@ export default {
         bytecodeHash: 'none',
       },
     },
+  },
+  mocha: {
+    timeout: 100000000
   },
 }

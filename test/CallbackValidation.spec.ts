@@ -1,31 +1,30 @@
-import { Contract, constants } from 'ethers'
-import { waffle, ethers } from 'hardhat'
-import { Fixture } from 'ethereum-waffle'
+import { constants } from 'ethers'
+import { Wallet, Contract } from 'zksync-web3'
 import completeFixture from './shared/completeFixture'
 import { expect } from './shared/expect'
 import { TestERC20, TestCallbackValidation } from '../typechain'
 import { FeeAmount } from './shared/constants'
+import { deployContract, getWallets } from "./shared/zkSyncUtils";
 
 describe('CallbackValidation', () => {
-  const [nonpairAddr, ...wallets] = waffle.provider.getWallets()
-  const callbackValidationFixture: Fixture<{
+  const [nonpairAddr, ...wallets] = getWallets()
+
+  async function callbackValidationFixture([wallet]: Wallet[]): Promise<{
     callbackValidation: TestCallbackValidation
     tokens: [TestERC20, TestERC20]
     factory: Contract
-  }> = async (wallets, provider) => {
-    const { factory } = await completeFixture(wallets, provider)
-    const tokenFactory = await ethers.getContractFactory('TestERC20')
-    const callbackValidationFactory = await ethers.getContractFactory('TestCallbackValidation')
+  }> {
+    const { factory } = await completeFixture([wallet])
     const tokens = (await Promise.all([
-      tokenFactory.deploy(constants.MaxUint256.div(2)), // do not use maxu256 to avoid overflowing
-      tokenFactory.deploy(constants.MaxUint256.div(2)),
+      deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]), // do not use maxu256 to avoid overflowing
+      deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
     ])) as [TestERC20, TestERC20]
-    const callbackValidation = (await callbackValidationFactory.deploy()) as TestCallbackValidation
+    const callbackValidation = (await deployContract(wallet, 'TestCallbackValidation')) as TestCallbackValidation
 
     return {
       tokens,
       callbackValidation,
-      factory,
+      factory: factory as Contract,
     }
   }
 
@@ -33,19 +32,13 @@ describe('CallbackValidation', () => {
   let tokens: [TestERC20, TestERC20]
   let factory: Contract
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(wallets)
-  })
-
   beforeEach('load fixture', async () => {
-    ;({ callbackValidation, tokens, factory } = await loadFixture(callbackValidationFixture))
+    ;({ callbackValidation, tokens, factory } = await callbackValidationFixture(wallets))
   })
 
   it('reverts when called from an address other than the associated UniswapV3Pool', async () => {
     expect(
-      callbackValidation
+        (callbackValidation as any)
         .connect(nonpairAddr)
         .verifyCallback(factory.address, tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
     ).to.be.reverted

@@ -1,5 +1,6 @@
 import { Fixture } from 'ethereum-waffle'
 import { constants } from 'ethers'
+import { Wallet } from 'zksync-web3'
 import { ethers, waffle } from 'hardhat'
 import { MockTimeNonfungiblePositionManager, Quoter, TestERC20 } from '../typechain'
 import completeFixture from './shared/completeFixture'
@@ -10,29 +11,30 @@ import { expect } from './shared/expect'
 import { encodePath } from './shared/path'
 import { getMaxTick, getMinTick } from './shared/ticks'
 
+import { deployContract, getWallets } from './shared/zkSyncUtils'
+
 describe('Quoter', () => {
   const wallets = waffle.provider.getWallets()
   const [wallet, trader] = wallets
 
-  const swapRouterFixture: Fixture<{
+  async function swapRouterFixture([wallet]: Wallet[]): Promise<{
     nft: MockTimeNonfungiblePositionManager
     tokens: [TestERC20, TestERC20, TestERC20]
     quoter: Quoter
-  }> = async (wallets, provider) => {
-    const { weth9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
+  }> {
+    const { weth9, factory, router, tokens, nft } = await completeFixture([wallet])
 
     // approve & fund wallets
     for (const token of tokens) {
       await Promise.all([
-        token.approve(router.address, constants.MaxUint256),
-        token.approve(nft.address, constants.MaxUint256),
-        token.connect(trader).approve(router.address, constants.MaxUint256),
-        token.transfer(trader.address, expandTo18Decimals(1_000_000)),
+        (await token.approve(router.address, constants.MaxUint256)).wait(),
+        (await token.approve(nft.address, constants.MaxUint256)).wait(),
+        (await token.connect(trader).approve(router.address, constants.MaxUint256)).wait(),
+        (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait(),
       ])
     }
 
-    const quoterFactory = await ethers.getContractFactory('Quoter')
-    quoter = (await quoterFactory.deploy(factory.address, weth9.address)) as Quoter
+    quoter = (await deployContract(wallet, 'Quoter', [factory.address, weth9.address])) as Quoter
 
     return {
       tokens,
@@ -45,15 +47,9 @@ describe('Quoter', () => {
   let tokens: [TestERC20, TestERC20, TestERC20]
   let quoter: Quoter
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(wallets)
-  })
-
   // helper for getting weth and token balances
   beforeEach('load fixture', async () => {
-    ;({ tokens, nft, quoter } = await loadFixture(swapRouterFixture))
+    ;({ tokens, nft, quoter } = await swapRouterFixture(wallets))
   })
 
   describe('quotes', () => {
@@ -61,12 +57,12 @@ describe('Quoter', () => {
       if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
         [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-      await nft.createAndInitializePoolIfNecessary(
+      await(await nft.createAndInitializePoolIfNecessary(
         tokenAddressA,
         tokenAddressB,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
-      )
+      )).wait()
 
       const liquidityParams = {
         token0: tokenAddressA,
@@ -86,8 +82,8 @@ describe('Quoter', () => {
     }
 
     beforeEach(async () => {
-      await createPool(tokens[0].address, tokens[1].address)
-      await createPool(tokens[1].address, tokens[2].address)
+      await(await createPool(tokens[0].address, tokens[1].address)).wait()
+      await(await createPool(tokens[1].address, tokens[2].address)).wait()
     })
 
     describe('#quoteExactInput', () => {

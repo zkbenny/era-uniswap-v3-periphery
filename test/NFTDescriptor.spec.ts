@@ -1,9 +1,7 @@
 import { BigNumber, constants } from 'ethers'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
-import { waffle, ethers } from 'hardhat'
 import { expect } from './shared/expect'
 import { TestERC20Metadata, NFTDescriptorTest } from '../typechain'
-import { Fixture } from 'ethereum-waffle'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import snapshotGasCost from './shared/snapshotGasCost'
 import { formatSqrtRatioX96 } from './shared/formatSqrtRatioX96'
@@ -12,6 +10,9 @@ import { randomBytes } from 'crypto'
 import { extractJSONFromURI } from './shared/extractJSONFromURI'
 import fs from 'fs'
 import isSvg from 'is-svg'
+import { Wallet } from 'zksync-web3'
+import { deployContract, getWallets } from './shared/zkSyncUtils'
+import hre from "hardhat";
 
 const TEN = BigNumber.from(10)
 const LOWEST_SQRT_RATIO = 4310618292
@@ -20,25 +21,25 @@ const HIGHEST_SQRT_RATIO = BigNumber.from(33849).mul(TEN.pow(34))
 describe('NFTDescriptor', () => {
   const wallets = waffle.provider.getWallets()
 
-  const nftDescriptorFixture: Fixture<{
+  async function nftDescriptorFixture([wallet]: Wallet[]): Promise<{
     tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
     nftDescriptor: NFTDescriptorTest
-  }> = async (wallets, provider) => {
-    const nftDescriptorLibraryFactory = await ethers.getContractFactory('NFTDescriptor')
-    const nftDescriptorLibrary = await nftDescriptorLibraryFactory.deploy()
+  }> {
+    const nftDescriptorLibrary = await deployContract(wallet, 'NFTDescriptor')
 
-    const tokenFactory = await ethers.getContractFactory('TestERC20Metadata')
-    const NFTDescriptorFactory = await ethers.getContractFactory('NFTDescriptorTest', {
-      libraries: {
+    const hre = require('hardhat')
+    hre.config.zksolc.settings.libraries = {
+      'contracts/libraries/NFTDescriptor.sol': {
         NFTDescriptor: nftDescriptorLibrary.address,
       },
-    })
-    const nftDescriptor = (await NFTDescriptorFactory.deploy()) as NFTDescriptorTest
+    }
+    await hre.run('compile')
+    const nftDescriptor = (await deployContract(wallet, 'NFTDescriptorTest')) as NFTDescriptorTest
     const tokens = (await Promise.all([
-      tokenFactory.deploy(constants.MaxUint256.div(2), 'Test ERC20', 'TEST1'), // do not use maxu256 to avoid overflowing
-      tokenFactory.deploy(constants.MaxUint256.div(2), 'Test ERC20', 'TEST2'),
-      tokenFactory.deploy(constants.MaxUint256.div(2), 'Test ERC20', 'TEST3'),
-      tokenFactory.deploy(constants.MaxUint256.div(2), 'Test ERC20', 'TEST4'),
+      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1']), // do not use maxu256 to avoid overflowing
+      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST2']),
+      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST3']),
+      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST4']),
     ])) as [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
     tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
     return {
@@ -50,14 +51,8 @@ describe('NFTDescriptor', () => {
   let nftDescriptor: NFTDescriptorTest
   let tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(wallets)
-  })
-
   beforeEach('load fixture', async () => {
-    ;({ nftDescriptor, tokens } = await loadFixture(nftDescriptorFixture))
+    ;({ nftDescriptor, tokens } = await nftDescriptorFixture(wallets))
   })
 
   describe('#constructTokenURI', () => {
