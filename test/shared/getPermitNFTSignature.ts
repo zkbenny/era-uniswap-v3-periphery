@@ -1,4 +1,5 @@
-import { BigNumber, BigNumberish, constants, Signature, Wallet } from 'ethers'
+import { BigNumber, BigNumberish, constants, Signature } from 'ethers'
+import { Wallet } from 'zksync-web3'
 import { splitSignature } from 'ethers/lib/utils'
 import { NonfungiblePositionManager } from '../../typechain'
 

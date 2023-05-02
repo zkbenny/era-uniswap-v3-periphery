@@ -1,25 +1,24 @@
-import { Contract } from 'ethers'
-import { waffle, ethers } from 'hardhat'
+import { Wallet, Contract } from 'zksync-web3'
 
-import { Fixture } from 'ethereum-waffle'
 import { PeripheryImmutableStateTest, IWETH9 } from '../typechain'
 import { expect } from './shared/expect'
 import { v3RouterFixture } from './shared/externalFixtures'
 
+import { deployContract, getWallets } from './shared/zkSyncUtils'
+
 describe('PeripheryImmutableState', () => {
-  const nonfungiblePositionManagerFixture: Fixture<{
+  async function nonfungiblePositionManagerFixture([wallet]: Wallet[]): Promise<{
     weth9: IWETH9
     factory: Contract
     state: PeripheryImmutableStateTest
-  }> = async (wallets, provider) => {
-    const { weth9, factory } = await v3RouterFixture(wallets, provider)
+  }> {
+    const { weth9, factory } = await v3RouterFixture([wallet])
 
-    const stateFactory = await ethers.getContractFactory('PeripheryImmutableStateTest')
-    const state = (await stateFactory.deploy(factory.address, weth9.address)) as PeripheryImmutableStateTest
+    const state = (await deployContract(wallet, 'PeripheryImmutableStateTest', [factory.address, weth9.address])) as PeripheryImmutableStateTest
 
     return {
       weth9,
-      factory,
+      factory: factory as Contract,
       state,
     }
   }
@@ -28,14 +27,8 @@ describe('PeripheryImmutableState', () => {
   let weth9: IWETH9
   let state: PeripheryImmutableStateTest
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(await (ethers as any).getSigners())
-  })
-
   beforeEach('load fixture', async () => {
-    ;({ state, weth9, factory } = await loadFixture(nonfungiblePositionManagerFixture))
+    ;({ state, weth9, factory } = await nonfungiblePositionManagerFixture(getWallets()))
   })
 
   it('bytecode size', async () => {

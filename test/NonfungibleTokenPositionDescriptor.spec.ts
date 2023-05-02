@@ -1,14 +1,20 @@
-import { constants, Wallet } from 'ethers'
-import { waffle, ethers } from 'hardhat'
+import { constants } from 'ethers'
+import { Wallet, Contract } from 'zksync-web3'
+import * as zk from 'zksync-web3'
 import { expect } from './shared/expect'
-import { Fixture } from 'ethereum-waffle'
-import { NonfungibleTokenPositionDescriptor, MockTimeNonfungiblePositionManager, TestERC20 } from '../typechain'
+import {
+  NonfungibleTokenPositionDescriptor,
+  MockTimeNonfungiblePositionManager,
+  TestERC20
+} from '../typechain'
 import completeFixture from './shared/completeFixture'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import { getMaxTick, getMinTick } from './shared/ticks'
 import { sortedTokens } from './shared/tokenSort'
 import { extractJSONFromURI } from './shared/extractJSONFromURI'
+
+import {deployContract, getWallets, loadArtifact} from './shared/zkSyncUtils'
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -19,17 +25,16 @@ const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
 describe('NonfungibleTokenPositionDescriptor', () => {
   let wallets: Wallet[]
 
-  const nftPositionDescriptorCompleteFixture: Fixture<{
-    nftPositionDescriptor: NonfungibleTokenPositionDescriptor
+  async function nftPositionDescriptorCompleteFixture([wallet]: Wallet[]): Promise<{
+    nftPositionDescriptor: Contract
     tokens: [TestERC20, TestERC20, TestERC20]
     nft: MockTimeNonfungiblePositionManager
-  }> = async (wallets, provider) => {
-    const { factory, nft, router, nftDescriptor } = await completeFixture(wallets, provider)
-    const tokenFactory = await ethers.getContractFactory('TestERC20')
+  }> {
+    const { factory, nft, router, nftDescriptor } = await completeFixture([wallet])
     const tokens: [TestERC20, TestERC20, TestERC20] = [
-      (await tokenFactory.deploy(constants.MaxUint256.div(2))) as TestERC20, // do not use maxu256 to avoid overflowing
-      (await tokenFactory.deploy(constants.MaxUint256.div(2))) as TestERC20,
-      (await tokenFactory.deploy(constants.MaxUint256.div(2))) as TestERC20,
+      (await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)])) as TestERC20, // do not use maxu256 to avoid overflowing
+      (await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)])) as TestERC20,
+      (await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)])) as TestERC20,
     ]
     tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
 
@@ -40,22 +45,20 @@ describe('NonfungibleTokenPositionDescriptor', () => {
     }
   }
 
-  let nftPositionDescriptor: NonfungibleTokenPositionDescriptor
+  let nftPositionDescriptor: Contract
   let tokens: [TestERC20, TestERC20, TestERC20]
   let nft: MockTimeNonfungiblePositionManager
   let weth9: TestERC20
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
   before('create fixture loader', async () => {
-    wallets = await (ethers as any).getSigners()
-
-    loadFixture = waffle.createFixtureLoader(wallets)
+    wallets = getWallets()
   })
 
   beforeEach('load fixture', async () => {
-    ;({ tokens, nft, nftPositionDescriptor } = await loadFixture(nftPositionDescriptorCompleteFixture))
-    const tokenFactory = await ethers.getContractFactory('TestERC20')
+    ;({ tokens, nft, nftPositionDescriptor } = await nftPositionDescriptorCompleteFixture(wallets))
+
+    const testERC20 = await loadArtifact('TestERC20')
+    const tokenFactory = new zk.ContractFactory(testERC20.abi, testERC20.bytecode, wallets[0])
     weth9 = tokenFactory.attach(await nftPositionDescriptor.WETH9()) as TestERC20
   })
 
@@ -114,15 +117,15 @@ describe('NonfungibleTokenPositionDescriptor', () => {
   describe('#tokenURI', () => {
     it('displays ETH as token symbol for WETH token', async () => {
       const [token0, token1] = sortedTokens(weth9, tokens[1])
-      await nft.createAndInitializePoolIfNecessary(
+      await(await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
-      )
-      await weth9.approve(nft.address, 100)
-      await tokens[1].approve(nft.address, 100)
-      await nft.mint({
+      )).wait()
+      await(await weth9.approve(nft.address, 100)).wait()
+      await(await tokens[1].approve(nft.address, 100)).wait()
+      await(await nft.mint({
         token0: token0.address,
         token1: token1.address,
         fee: FeeAmount.MEDIUM,
@@ -134,7 +137,7 @@ describe('NonfungibleTokenPositionDescriptor', () => {
         amount0Min: 0,
         amount1Min: 0,
         deadline: 1,
-      })
+      })).wait()
 
       const metadata = extractJSONFromURI(await nft.tokenURI(1))
       expect(metadata.name).to.match(/(\sETH\/TEST|TEST\/ETH)/)
@@ -144,15 +147,15 @@ describe('NonfungibleTokenPositionDescriptor', () => {
 
     it('displays returned token symbols when neither token is WETH ', async () => {
       const [token0, token1] = sortedTokens(tokens[2], tokens[1])
-      await nft.createAndInitializePoolIfNecessary(
+      await(await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
-      )
-      await tokens[1].approve(nft.address, 100)
-      await tokens[2].approve(nft.address, 100)
-      await nft.mint({
+      )).wait()
+      await(await tokens[1].approve(nft.address, 100)).wait()
+      await(await tokens[2].approve(nft.address, 100)).wait()
+      await(await nft.mint({
         token0: token0.address,
         token1: token1.address,
         fee: FeeAmount.MEDIUM,
@@ -164,7 +167,7 @@ describe('NonfungibleTokenPositionDescriptor', () => {
         amount0Min: 0,
         amount1Min: 0,
         deadline: 1,
-      })
+      })).wait()
 
       const metadata = extractJSONFromURI(await nft.tokenURI(1))
       expect(metadata.name).to.match(/TEST\/TEST/)

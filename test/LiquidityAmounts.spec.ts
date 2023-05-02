@@ -1,7 +1,7 @@
-import { ethers } from 'hardhat'
 import { LiquidityAmountsTest } from '../typechain/LiquidityAmountsTest'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import { expect } from './shared/expect'
+import { getWallets, deployContract } from "./shared/zkSyncUtils";
 
 import snapshotGasCost from './shared/snapshotGasCost'
 
@@ -9,8 +9,7 @@ describe('LiquidityAmounts', async () => {
   let liquidityFromAmounts: LiquidityAmountsTest
 
   before('deploy test library', async () => {
-    const liquidityFromAmountsTestFactory = await ethers.getContractFactory('LiquidityAmountsTest')
-    liquidityFromAmounts = (await liquidityFromAmountsTestFactory.deploy()) as LiquidityAmountsTest
+    liquidityFromAmounts = (await deployContract(getWallets()[0], 'LiquidityAmountsTest')) as LiquidityAmountsTest
   })
 
   describe('#getLiquidityForAmount0', () => {

@@ -1,27 +1,22 @@
 import { constants } from 'ethers'
-import { waffle, ethers } from 'hardhat'
+import { Wallet } from 'zksync-web3'
 
 import { PoolAddressTest } from '../typechain'
 import { POOL_BYTECODE_HASH } from './shared/computePoolAddress'
 import { expect } from './shared/expect'
 import snapshotGasCost from './shared/snapshotGasCost'
 
+import { deployContract, getWallets } from './shared/zkSyncUtils'
+
 describe('PoolAddress', () => {
   let poolAddress: PoolAddressTest
 
-  const poolAddressTestFixture = async () => {
-    const poolAddressTestFactory = await ethers.getContractFactory('PoolAddressTest')
-    return (await poolAddressTestFactory.deploy()) as PoolAddressTest
+  async function poolAddressTestFixture([wallet]: Wallet[]) {
+    return (await deployContract(wallet, 'PoolAddressTest')) as PoolAddressTest
   }
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(await (ethers as any).getSigners())
-  })
-
   beforeEach('deploy PoolAddressTest', async () => {
-    poolAddress = await loadFixture(poolAddressTestFixture)
+    poolAddress = await poolAddressTestFixture(getWallets())
   })
 
   describe('#POOL_INIT_CODE_HASH', () => {
