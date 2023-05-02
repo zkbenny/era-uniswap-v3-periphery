@@ -1,4 +1,5 @@
-import { BigNumberish, constants, Signature, Wallet } from 'ethers'
+import { BigNumberish, constants, Signature } from 'ethers'
+import { Wallet } from 'zksync-web3'
 import { splitSignature } from 'ethers/lib/utils'
 import { TestERC20, TestERC20PermitAllowed } from '../../typechain'
 

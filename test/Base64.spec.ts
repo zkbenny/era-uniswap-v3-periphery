@@ -1,9 +1,9 @@
-import { ethers } from 'hardhat'
 import { base64Encode } from './shared/base64'
 import { expect } from './shared/expect'
 import { Base64Test } from '../typechain'
 import { randomBytes } from 'crypto'
 import snapshotGasCost from './shared/snapshotGasCost'
+import { deployContract, getWallets } from './shared/zkSyncUtils'
 
 function stringToHex(str: string): string {
   return `0x${Buffer.from(str, 'utf8').toString('hex')}`
@@ -12,7 +12,7 @@ function stringToHex(str: string): string {
 describe('Base64', () => {
   let base64: Base64Test
   before('deploy test contract', async () => {
-    base64 = (await (await ethers.getContractFactory('Base64Test')).deploy()) as Base64Test
+    base64 = (await deployContract(getWallets()[0], 'Base64Test')) as Base64Test
   })
 
   describe('#encode', () => {

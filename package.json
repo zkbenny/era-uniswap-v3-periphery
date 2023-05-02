@@ -35,12 +35,13 @@
   "dependencies": {
     "@openzeppelin/contracts": "3.4.1-solc-0.7-2",
     "@uniswap/lib": "^4.0.1-alpha",
-    "@uniswap/v2-core": "1.0.1",
+    "@uniswap/v2-core": "https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era",
     "@uniswap/v3-core": "https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era",
     "base64-sol": "1.0.1",
     "hardhat-watcher": "^2.1.1"
   },
   "devDependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^0.6.3",
     "@matterlabs/hardhat-zksync-solc": "^0.3.16",
     "@matterlabs/hardhat-zksync-verify": "^0.1.5",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -70,6 +71,7 @@
   },
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test --network zkSyncLocalhost",
+    "local-setup": "./scripts/start-local-setup.sh"
   }
 }

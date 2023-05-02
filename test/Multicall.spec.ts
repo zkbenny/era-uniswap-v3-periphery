@@ -1,7 +1,7 @@
-import { Wallet } from 'ethers'
-import { ethers, waffle } from 'hardhat'
+import { Wallet } from 'zksync-web3'
 import { TestMulticall } from '../typechain/TestMulticall'
 import { expect } from './shared/expect'
+import { getWallets, deployContract } from './shared/zkSyncUtils'
 
 import snapshotGasCost from './shared/snapshotGasCost'
 
@@ -11,12 +11,11 @@ describe('Multicall', async () => {
   let multicall: TestMulticall
 
   before('get wallets', async () => {
-    wallets = await (ethers as any).getSigners()
+    wallets = getWallets()
   })
 
   beforeEach('create multicall', async () => {
-    const multicallTestFactory = await ethers.getContractFactory('TestMulticall')
-    multicall = (await multicallTestFactory.deploy()) as TestMulticall
+    multicall = (await deployContract(getWallets()[0], 'TestMulticall')) as TestMulticall
   })
 
   it('revert messages are returned', async () => {
@@ -38,15 +37,15 @@ describe('Multicall', async () => {
 
   describe('context is preserved', () => {
     it('msg.value', async () => {
-      await multicall.multicall([multicall.interface.encodeFunctionData('pays')], { value: 3 })
+      await (await multicall.multicall([multicall.interface.encodeFunctionData('pays')], { value: 3 })).wait()
       expect(await multicall.paid()).to.eq(3)
     })
 
     it('msg.value used twice', async () => {
-      await multicall.multicall(
+      await (await multicall.multicall(
         [multicall.interface.encodeFunctionData('pays'), multicall.interface.encodeFunctionData('pays')],
         { value: 3 }
-      )
+      )).wait()
       expect(await multicall.paid()).to.eq(6)
     })
 

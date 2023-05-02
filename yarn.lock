@@ -694,6 +694,13 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
+"@matterlabs/hardhat-zksync-deploy@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-deploy/-/hardhat-zksync-deploy-0.6.3.tgz#833b208373e7037bf43671054328d82511444e2a"
+  integrity sha512-FB+2xFL/80JJwlGna+aHA6dk4ONrMFqThTZATYVJUAKooA0Aw5qmpmM8B3qsNB4LLzHSO/EmVrHIcLaPv8hYwQ==
+  dependencies:
+    chalk "4.1.2"
+
 "@matterlabs/hardhat-zksync-solc@0.3.14":
   version "0.3.14"
   resolved "https://registry.yarnpkg.com/@matterlabs/hardhat-zksync-solc/-/hardhat-zksync-solc-0.3.14.tgz#0a32f01b4cd8631ecd8dfe0547e3ac49ab8290d5"
@@ -1042,9 +1049,9 @@
   version "4.0.1-alpha"
   resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-4.0.1-alpha.tgz#2881008e55f075344675b3bca93f020b028fbd02"
 
-"@uniswap/v2-core@1.0.1":
+"@uniswap/v2-core@https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@uniswap/v2-core/-/v2-core-1.0.1.tgz#af8f508bf183204779938969e2e54043e147d425"
+  resolved "https://github.com/AntonD3/v2-core.git#50e8a70407583df3742b6ccce19b486253a87421"
 
 "@uniswap/v3-core@https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
