@@ -1,7 +1,7 @@
 import { BigNumber, constants } from 'ethers'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import { expect } from './shared/expect'
-import { TestERC20Metadata, NFTDescriptorTest } from '../typechain'
+import { TestERC20Metadata } from '../typechain'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import snapshotGasCost from './shared/snapshotGasCost'
 import { formatSqrtRatioX96 } from './shared/formatSqrtRatioX96'
@@ -10,7 +10,7 @@ import { randomBytes } from 'crypto'
 import { extractJSONFromURI } from './shared/extractJSONFromURI'
 import fs from 'fs'
 import isSvg from 'is-svg'
-import { Wallet } from 'zksync-web3'
+import { Wallet, Contract } from 'zksync-web3'
 import { deployContract, getWallets } from './shared/zkSyncUtils'
 import hre from "hardhat";
 
@@ -23,9 +23,9 @@ describe('NFTDescriptor', () => {
 
   async function nftDescriptorFixture([wallet]: Wallet[]): Promise<{
     tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
-    nftDescriptor: NFTDescriptorTest
+    nftDescriptor: Contract
   }> {
-    const nftDescriptor = (await deployContract(wallet, 'NFTDescriptorTest')) as NFTDescriptorTest
+    const nftDescriptor = await deployContract(wallet, 'NFTDescriptorTest')
     // const TestERC20Metadata = deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1'])
     const tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata] = [
       (await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1'])) as TestERC20Metadata, // do not use maxu256 to avoid overflowing
@@ -40,7 +40,7 @@ describe('NFTDescriptor', () => {
     }
   }
 
-  let nftDescriptor: NFTDescriptorTest
+  let nftDescriptor: Contract
   let tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
 
   before('create fixture loader', async () => {

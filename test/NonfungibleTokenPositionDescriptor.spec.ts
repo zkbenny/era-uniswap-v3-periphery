@@ -3,7 +3,6 @@ import { Wallet, Contract } from 'zksync-web3'
 import * as zk from 'zksync-web3'
 import { expect } from './shared/expect'
 import {
-  NonfungibleTokenPositionDescriptor,
   MockTimeNonfungiblePositionManager,
   TestERC20
 } from '../typechain'

@@ -70,7 +70,7 @@
     "zksync-web3": "^0.14.3"
   },
   "scripts": {
-    "compile": "hardhat compile",
+    "compile": "hardhat compile --network zkSyncLocalhost",
     "test": "hardhat test --network zkSyncLocalhost",
     "local-setup": "./scripts/start-local-setup.sh"
   }
