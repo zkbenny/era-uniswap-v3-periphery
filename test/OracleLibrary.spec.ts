@@ -317,7 +317,7 @@ describe('OracleLibrary', () => {
     })
 
     const deployMockObservationsContract = async () => {
-      mockObservations = deployContract(getWallets()[0], 'MockObservations', [
+      mockObservations = await deployContract(getWallets()[0], 'MockObservations', [
         blockTimestamps,
         tickCumulatives,
         liquidityValues,

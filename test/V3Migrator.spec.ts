@@ -1,6 +1,5 @@
-import { constants, Contract, Wallet } from 'ethers'
+import { constants } from 'ethers'
 import { Contract, Wallet } from 'zksync-web3'
-import { ethers, waffle } from 'hardhat'
 import {
   IUniswapV2Pair,
   IUniswapV3Factory,
@@ -12,13 +11,15 @@ import {
 import completeFixture from './shared/completeFixture'
 import { v2FactoryFixture } from './shared/externalFixtures'
 
-import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/build/UniswapV2Pair.json'
+import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/artifacts-zk/contracts/UniswapV2Pair.sol/UniswapV2Pair.json'
 import { expect } from 'chai'
 import { FeeAmount } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import snapshotGasCost from './shared/snapshotGasCost'
 import { sortedTokens } from './shared/tokenSort'
 import { getMaxTick, getMinTick } from './shared/ticks'
+
+import { getWallets, deployContract, provider } from './shared/zkSyncUtils'
 
 describe('V3Migrator', () => {
   let wallet: Wallet
@@ -81,7 +82,7 @@ describe('V3Migrator', () => {
 
     const pairAddress = await factoryV2.getPair(token.address, weth9.address)
 
-    pair = new ethers.Contract(pairAddress, PAIR_V2_ABI, wallet) as IUniswapV2Pair
+    pair = new Contract(pairAddress, PAIR_V2_ABI, wallet as any) as IUniswapV2Pair
 
     await(await token.transfer(pair.address, 10000)).wait()
     await(await weth9.transfer(pair.address, 10000)).wait()
@@ -106,7 +107,7 @@ describe('V3Migrator', () => {
   })
 
   afterEach('ensure eth balance is cleared', async () => {
-    const balanceETH = await ethers.provider.getBalance(migrator.address)
+    const balanceETH = await provider.getBalance(migrator.address)
     expect(balanceETH).to.be.eq(0)
   })
 

@@ -851,7 +851,7 @@ describe('NonfungiblePositionManager', () => {
         recipient: wallet.address,
         amount0Max: MaxUint128,
         amount1Max: MaxUint128,
-      }))
+      })).wait()
       await(await snapshotGasCost((nft as any).connect(other).burn(tokenId)))
     })
   })
@@ -1270,19 +1270,18 @@ describe('NonfungiblePositionManager', () => {
 
   describe('#positions', async () => {
     it('gas', async () => {
-      const positionsGasTestFactory = await ethers.getContractFactory('NonfungiblePositionManagerPositionsGasTest')
-      const positionsGasTest = (await positionsGasTestFactory.deploy(
+      const positionsGasTest = (await deployContract(wallets[0], 'NonfungiblePositionManagerPositionsGasTest', [
         nft.address
-      )) as NonfungiblePositionManagerPositionsGasTest
+      ])) as NonfungiblePositionManagerPositionsGasTest
 
-      await nft.createAndInitializePoolIfNecessary(
+      await(await nft.createAndInitializePoolIfNecessary(
         tokens[0].address,
         tokens[1].address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
-      )
+      )).wait()
 
-      await nft.mint({
+      await(await nft.mint({
         token0: tokens[0].address,
         token1: tokens[1].address,
         tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
@@ -1294,7 +1293,7 @@ describe('NonfungiblePositionManager', () => {
         amount0Min: 0,
         amount1Min: 0,
         deadline: 10,
-      })
+      })).wait()
 
       await snapshotGasCost(positionsGasTest.getGasCostOfPositions(1))
     })

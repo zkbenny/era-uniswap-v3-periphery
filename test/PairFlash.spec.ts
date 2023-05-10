@@ -1,4 +1,3 @@
-import { ethers, waffle } from 'hardhat'
 import { BigNumber, constants, Contract, ContractTransaction } from 'ethers'
 import {
   IWETH9,
@@ -21,10 +20,12 @@ import snapshotGasCost from './shared/snapshotGasCost'
 import { expect } from './shared/expect'
 import { getMaxTick, getMinTick } from './shared/ticks'
 import { computePoolAddress } from './shared/computePoolAddress'
+import {Wallet} from "zksync-web3";
+import {deployContract, getWallets} from "./shared/zkSyncUtils";
 
 describe('PairFlash test', () => {
-  const provider = waffle.provider
-  const wallets = waffle.provider.getWallets()
+  // const provider = waffle.provider
+  const wallets = getWallets()
   const wallet = wallets[0]
 
   let flash: PairFlash
@@ -38,7 +39,7 @@ describe('PairFlash test', () => {
     if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
       [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-    await nft.createAndInitializePoolIfNecessary(tokenAddressA, tokenAddressB, fee, price)
+    await(await nft.createAndInitializePoolIfNecessary(tokenAddressA, tokenAddressB, fee, price)).wait()
 
     const liquidityParams = {
       token0: tokenAddressA,
@@ -57,16 +58,14 @@ describe('PairFlash test', () => {
     return nft.mint(liquidityParams)
   }
 
-  const flashFixture = async () => {
-    const { router, tokens, factory, weth9, nft } = await completeFixture(wallets, provider)
+  async function flashFixture([wallet]: Wallet[]) {
+    const { router, tokens, factory, weth9, nft } = await completeFixture([wallet])
     const token0 = tokens[0]
     const token1 = tokens[1]
 
-    const flashContractFactory = await ethers.getContractFactory('PairFlash')
-    const flash = (await flashContractFactory.deploy(router.address, factory.address, weth9.address)) as PairFlash
+    const flash = (await deployContract(wallet, 'PairFlash', [router.address, factory.address, weth9.address])) as PairFlash
 
-    const quoterFactory = await ethers.getContractFactory('Quoter')
-    const quoter = (await quoterFactory.deploy(factory.address, weth9.address)) as Quoter
+    const quoter = (await deployContract(wallet, 'Quoter', [factory.address, weth9.address])) as Quoter
 
     return {
       token0,
@@ -80,20 +79,14 @@ describe('PairFlash test', () => {
     }
   }
 
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
-
-  before('create fixture loader', async () => {
-    loadFixture = waffle.createFixtureLoader(wallets)
-  })
-
   beforeEach('load fixture', async () => {
-    ;({ factory, token0, token1, flash, nft, quoter } = await loadFixture(flashFixture))
+    ;({ factory, token0, token1, flash, nft, quoter } = await flashFixture(wallets))
 
-    await token0.approve(nft.address, MaxUint128)
-    await token1.approve(nft.address, MaxUint128)
-    await createPool(token0.address, token1.address, FeeAmount.LOW, encodePriceSqrt(5, 10))
-    await createPool(token0.address, token1.address, FeeAmount.MEDIUM, encodePriceSqrt(1, 1))
-    await createPool(token0.address, token1.address, FeeAmount.HIGH, encodePriceSqrt(20, 10))
+    await(await token0.approve(nft.address, MaxUint128)).wait()
+    await(await token1.approve(nft.address, MaxUint128)).wait()
+    await(await createPool(token0.address, token1.address, FeeAmount.LOW, encodePriceSqrt(5, 10))).wait()
+    await(await createPool(token0.address, token1.address, FeeAmount.MEDIUM, encodePriceSqrt(1, 1))).wait()
+    await(await createPool(token0.address, token1.address, FeeAmount.HIGH, encodePriceSqrt(20, 10))).wait()
   })
 
   describe('flash', () => {
