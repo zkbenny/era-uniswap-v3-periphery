@@ -192,12 +192,12 @@ describe('SwapRouter', () => {
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
-          await exactInput(
+          await(await exactInput(
             tokens
               .slice(0, 2)
               .reverse()
               .map((token) => token.address)
-          )
+          )).wait()
 
           // get balances after
           const poolAfter = await getBalances(pool)
@@ -286,8 +286,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([weth9.address, tokens[0].address]))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 3)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 3)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -302,8 +302,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([weth9.address, tokens[0].address, tokens[1].address], 5))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 5)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 5)
 
             const traderAfter = await getBalances(trader.address)
 
@@ -327,8 +327,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([tokens[0].address, weth9.address]))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -344,8 +344,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInput([tokens[0].address, tokens[1].address, weth9.address], 5))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const traderAfter = await getBalances(trader.address)
@@ -452,8 +452,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInputSingle(weth9.address, tokens[0].address))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 3)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 3)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -481,8 +481,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactInputSingle(tokens[0].address, weth9.address))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -642,8 +642,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutput([weth9.address, tokens[0].address]))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 3)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 3)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -658,8 +658,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutput([weth9.address, tokens[0].address, tokens[1].address], 1, 5))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 5)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 5)
 
             const traderAfter = await getBalances(trader.address)
 
@@ -683,8 +683,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutput([tokens[0].address, weth9.address]))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -700,8 +700,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutput([tokens[0].address, tokens[1].address, weth9.address], 1, 5))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const traderAfter = await getBalances(trader.address)
@@ -805,8 +805,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutputSingle(weth9.address, tokens[0].address))
-              .to.emit(weth9, 'Deposit')
-              .withArgs(router.address, 3)
+              .to.emit(weth9, 'Transfer')
+              .withArgs('0x0000000000000000000000000000000000000000', router.address, 3)
 
             // get balances after
             const poolAfter = await getBalances(pool)
@@ -834,8 +834,8 @@ describe('SwapRouter', () => {
             const traderBefore = await getBalances(trader.address)
 
             await expect(exactOutputSingle(tokens[0].address, weth9.address))
-              .to.emit(weth9, 'Withdrawal')
-              .withArgs(router.address, 1)
+              .to.emit(weth9, 'Transfer')
+              .withArgs(router.address, '0x0000000000000000000000000000000000000000', 1)
 
             // get balances after
             const poolAfter = await getBalances(pool)
