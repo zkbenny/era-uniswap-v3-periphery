@@ -850,7 +850,7 @@ describe('NonfungiblePositionManager', () => {
         recipient: wallet.address,
         amount0Max: MaxUint128,
         amount1Max: MaxUint128,
-      }))
+      })).wait()
       await(await snapshotGasCost((nft as any).connect(other).burn(tokenId)))
     })
   })
