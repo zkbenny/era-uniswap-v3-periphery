@@ -141,12 +141,12 @@ describe('V3Migrator', () => {
 
     it('works once v3 pool is initialized', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await migrator.createAndInitializePoolIfNecessary(
+      await(await migrator.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
-      )
+      )).wait()
 
       await(await pair.approve(migrator.address, expectedLiquidity)).wait()
       await(await migrator.migrate({

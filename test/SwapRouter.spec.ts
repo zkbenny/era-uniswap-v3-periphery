@@ -472,8 +472,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await(await createPoolWETH9(tokens[0].address)).wait()
+            await(await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -634,7 +634,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await(await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
@@ -674,8 +674,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await(await createPoolWETH9(tokens[0].address)).wait()
+            await(await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -797,7 +797,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await(await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
