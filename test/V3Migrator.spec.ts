@@ -1,4 +1,4 @@
-import { constants, Contract } from 'ethers'
+import { constants } from 'ethers'
 import { Contract, Wallet } from 'zksync-web3'
 import {
   IUniswapV2Pair,
@@ -11,7 +11,7 @@ import {
 import completeFixture from './shared/completeFixture'
 import { v2FactoryFixture } from './shared/externalFixtures'
 
-import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/build/UniswapV2Pair.json'
+import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/artifacts-zk/contracts/UniswapV2Pair.sol/UniswapV2Pair.json'
 import { expect } from 'chai'
 import { FeeAmount } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
@@ -33,9 +33,9 @@ describe('V3Migrator', () => {
     nft: MockTimeNonfungiblePositionManager
     migrator: V3Migrator
   }> {
-    const { factory, tokens, nft, weth9 } = await completeFixture(wallets, provider)
+    const { factory, tokens, nft, weth9 } = await completeFixture([wallet])
 
-    const { factory: factoryV2 } = await v2FactoryFixture(wallets, provider)
+    const { factory: factoryV2 } = await v2FactoryFixture([wallet])
 
     const token = tokens[0]
     await(await token.approve(factoryV2.address, constants.MaxUint256)).wait()
@@ -43,11 +43,11 @@ describe('V3Migrator', () => {
     await(await weth9.approve(nft.address, constants.MaxUint256)).wait()
 
     // deploy the migrator
-    const migrator = (await (await ethers.getContractFactory('V3Migrator')).deploy(
+    const migrator = (await deployContract(wallet, 'V3Migrator', [
       factory.address,
       weth9.address,
       nft.address
-    )) as V3Migrator
+    ])) as V3Migrator
 
     return {
       factoryV2,
@@ -86,7 +86,7 @@ describe('V3Migrator', () => {
   })
 
   afterEach('ensure eth balance is cleared', async () => {
-    const balanceETH = await ethers.provider.getBalance(migrator.address)
+    const balanceETH = await provider.getBalance(migrator.address)
     expect(balanceETH).to.be.eq(0)
   })
 
@@ -104,7 +104,7 @@ describe('V3Migrator', () => {
 
       const pairAddress = await factoryV2.getPair(token.address, weth9.address)
 
-      pair = new ethers.Contract(pairAddress, PAIR_V2_ABI, wallet) as IUniswapV2Pair
+      pair = new Contract(pairAddress, PAIR_V2_ABI, wallet as any) as IUniswapV2Pair
 
       await(await token.transfer(pair.address, 10000)).wait()
       await(await weth9.transfer(pair.address, 10000)).wait()

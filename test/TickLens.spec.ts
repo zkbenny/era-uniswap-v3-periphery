@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, constants, Contract, ContractTransaction } from 'ethers'
+import { BigNumber, BigNumberish, constants, ContractTransaction } from 'ethers'
 import { Contract, Wallet } from 'zksync-web3'
 import { MockTimeNonfungiblePositionManager, TestERC20, TickLensTest } from '../typechain'
 import completeFixture from './shared/completeFixture'
@@ -25,7 +25,7 @@ describe('TickLens', () => {
     }
 
     return {
-      factory,
+      factory: factory as Contract,
       nft,
       tokens,
     }
@@ -98,8 +98,7 @@ describe('TickLens', () => {
     })
 
     beforeEach(async () => {
-      const lensFactory = await ethers.getContractFactory('TickLensTest')
-      tickLens = (await lensFactory.deploy()) as TickLensTest
+      tickLens = (await deployContract(wallets[0], 'TickLensTest')) as TickLensTest
     })
 
     function getTickBitmapIndex(tick: BigNumberish, tickSpacing: number): BigNumber {

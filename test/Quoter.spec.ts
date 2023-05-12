@@ -28,7 +28,7 @@ describe('Quoter', () => {
       await Promise.all([
         (await token.approve(router.address, constants.MaxUint256)).wait(),
         (await token.approve(nft.address, constants.MaxUint256)).wait(),
-        (await token.connect(trader).approve(router.address, constants.MaxUint256)).wait(),
+        (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait(),
         (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait(),
       ])
     }

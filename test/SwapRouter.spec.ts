@@ -1,4 +1,4 @@
-import { BigNumber, constants, Contract, ContractTransaction } from 'ethers'
+import { BigNumber, constants, ContractTransaction } from 'ethers'
 import { Wallet, Contract } from 'zksync-web3'
 import{ provider } from './shared/zkSyncUtils'
 import { IWETH9, MockTimeNonfungiblePositionManager, MockTimeSwapRouter, TestERC20 } from '../typechain'
@@ -30,14 +30,14 @@ describe('SwapRouter', () => {
       await Promise.all([
         (await token.approve(router.address, constants.MaxUint256)).wait(),
         (await token.approve(nft.address, constants.MaxUint256)).wait(),
-        (await token.connect(trader).approve(router.address, constants.MaxUint256)).wait(),
+        (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait(),
         (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait(),
       ])
     }
 
     return {
       weth9,
-      factory,
+      factory: factory as Contract,
       router,
       tokens,
       nft,
@@ -156,13 +156,13 @@ describe('SwapRouter', () => {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountOutMinimum += 1
-        await expect(router.connect(trader).exactInput(params, { value })).to.be.revertedWith('Too little received')
+        await expect((router as any).connect(trader).exactInput(params, { value })).to.be.revertedWith('Too little received')
         params.amountOutMinimum -= 1
 
         // optimized for the gas test
         return data.length === 1
-          ? router.connect(trader).exactInput(params, { value })
-          : router.connect(trader).multicall(data, { value })
+          ? (router as any).connect(trader).exactInput(params, { value })
+          : (router as any).connect(trader).multicall(data, { value })
       }
 
       describe('single-pool', () => {
@@ -389,15 +389,15 @@ describe('SwapRouter', () => {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountOutMinimum += 1
-        await expect(router.connect(trader).exactInputSingle(params, { value })).to.be.revertedWith(
+        await expect((router as any).connect(trader).exactInputSingle(params, { value })).to.be.revertedWith(
           'Too little received'
         )
         params.amountOutMinimum -= 1
 
         // optimized for the gas test
         return data.length === 1
-          ? router.connect(trader).exactInputSingle(params, { value })
-          : router.connect(trader).multicall(data, { value })
+          ? (router as any).connect(trader).exactInputSingle(params, { value })
+          : (router as any).connect(trader).multicall(data, { value })
       }
 
       it('0 -> 1', async () => {
@@ -521,10 +521,10 @@ describe('SwapRouter', () => {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountInMaximum -= 1
-        await expect(router.connect(trader).exactOutput(params, { value })).to.be.revertedWith('Too much requested')
+        await expect((router as any).connect(trader).exactOutput(params, { value })).to.be.revertedWith('Too much requested')
         params.amountInMaximum += 1
 
-        return router.connect(trader).multicall(data, { value })
+        return (router as any).connect(trader).multicall(data, { value })
       }
 
       describe('single-pool', () => {
@@ -745,12 +745,12 @@ describe('SwapRouter', () => {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountInMaximum -= 1
-        await expect(router.connect(trader).exactOutputSingle(params, { value })).to.be.revertedWith(
+        await expect((router as any).connect(trader).exactOutputSingle(params, { value })).to.be.revertedWith(
           'Too much requested'
         )
         params.amountInMaximum += 1
 
-        return router.connect(trader).multicall(data, { value })
+        return (router as any).connect(trader).multicall(data, { value })
       }
 
       it('0 -> 1', async () => {
@@ -873,7 +873,7 @@ describe('SwapRouter', () => {
           ]),
         ]
 
-        await(await router.connect(trader).multicall(data)).wait()
+        await(await (router as any).connect(trader).multicall(data)).wait()
 
         const balance = await tokens[1].balanceOf(feeRecipient)
         expect(balance.eq(1)).to.be.eq(true)
@@ -901,7 +901,7 @@ describe('SwapRouter', () => {
           ]),
         ]
 
-        await(await router.connect(trader).multicall(data)).wait()
+        await(await (router as any).connect(trader).multicall(data)).wait()
 
         const balance = await provider.getBalance(feeRecipient)
         expect(balance.eq(1)).to.be.eq(true)

@@ -10,7 +10,7 @@ import { encodePath } from './shared/path'
 import snapshotGasCost from './shared/snapshotGasCost'
 import { getMaxTick, getMinTick } from './shared/ticks'
 
-import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
+import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts-zk/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
 
 import { getWallets, deployContract } from './shared/zkSyncUtils'
 
@@ -31,7 +31,7 @@ describe('SwapRouter gas tests', () => {
       await Promise.all([
         (await token.approve(router.address, constants.MaxUint256)).wait(),
         (await token.approve(nft.address, constants.MaxUint256)).wait(),
-        (await token.connect(trader).approve(router.address, constants.MaxUint256)).wait(),
+        (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait(),
         (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait(),
       ])
     }
@@ -82,7 +82,7 @@ describe('SwapRouter gas tests', () => {
       factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM),
     ])
 
-    const pools = poolAddresses.map((poolAddress) => new ethers.Contract(poolAddress, IUniswapV3PoolABI, wallet)) as [
+    const pools = poolAddresses.map((poolAddress) => new Contract(poolAddress, IUniswapV3PoolABI, wallet as any)) as [
       IUniswapV3Pool,
       IUniswapV3Pool,
       IUniswapV3Pool
@@ -267,11 +267,10 @@ describe('SwapRouter gas tests', () => {
     })
 
     it('0 -> 1 minimal', async () => {
-      const calleeFactory = await ethers.getContractFactory('TestUniswapV3Callee')
-      const callee = await calleeFactory.deploy()
+      const callee = await deployContract(wallet, 'TestUniswapV3Callee')
 
-      await(await tokens[0].connect(trader).approve(callee.address, constants.MaxUint256)).wait()
-      await snapshotGasCost(callee.connect(trader).swapExact0For1(pools[0].address, 2, trader.address, '4295128740'))
+      await(await (tokens[0] as any).connect(trader).approve(callee.address, constants.MaxUint256)).wait()
+      await snapshotGasCost((callee as any).connect(trader).swapExact0For1(pools[0].address, 2, trader.address, '4295128740'))
     })
 
     it('0 -> 1 -> 2', async () => {
