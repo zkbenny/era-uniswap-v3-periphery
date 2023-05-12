@@ -19,7 +19,7 @@ const LOWEST_SQRT_RATIO = 4310618292
 const HIGHEST_SQRT_RATIO = BigNumber.from(33849).mul(TEN.pow(34))
 
 describe('NFTDescriptor', () => {
-  const wallets = waffle.provider.getWallets()
+  const wallets = getWallets()
 
   async function nftDescriptorFixture([wallet]: Wallet[]): Promise<{
     tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]

@@ -1,7 +1,6 @@
 import { Fixture } from 'ethereum-waffle'
 import { constants } from 'ethers'
 import { Wallet } from 'zksync-web3'
-import { ethers, waffle } from 'hardhat'
 import { MockTimeNonfungiblePositionManager, Quoter, TestERC20 } from '../typechain'
 import completeFixture from './shared/completeFixture'
 import { FeeAmount, MaxUint128, TICK_SPACINGS } from './shared/constants'
@@ -14,7 +13,7 @@ import { getMaxTick, getMinTick } from './shared/ticks'
 import { deployContract, getWallets } from './shared/zkSyncUtils'
 
 describe('Quoter', () => {
-  const wallets = waffle.provider.getWallets()
+  const wallets = getWallets()
   const [wallet, trader] = wallets
 
   async function swapRouterFixture([wallet]: Wallet[]): Promise<{
