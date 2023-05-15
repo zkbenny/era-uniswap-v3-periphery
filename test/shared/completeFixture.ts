@@ -23,11 +23,11 @@ async function completeFixture([wallet]: Wallet[]): Promise<{
 }> {
   const { weth9, factory, router } = await v3RouterFixture([wallet])
 
-  const tokens = (await Promise.all([
-    deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]), // do not use maxu256 to avoid overflowing
-    deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
-    deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
-  ])) as [TestERC20, TestERC20, TestERC20]
+  const tokens = (await [
+    await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]), // do not use maxu256 to avoid overflowing
+    await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
+    await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
+  ]) as [TestERC20, TestERC20, TestERC20]
 
   if (nftDescriptorLibrary === undefined) {
     nftDescriptorLibrary = await deployContract(wallet, 'NFTDescriptor')

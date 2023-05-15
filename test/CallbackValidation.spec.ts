@@ -15,10 +15,10 @@ describe('CallbackValidation', () => {
     factory: Contract
   }> {
     const { factory } = await completeFixture([wallet])
-    const tokens = (await Promise.all([
-      deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]), // do not use maxu256 to avoid overflowing
-      deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
-    ])) as [TestERC20, TestERC20]
+    const tokens = (await [
+      await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]), // do not use maxu256 to avoid overflowing
+      await deployContract(wallet, 'TestERC20', [constants.MaxUint256.div(2)]),
+    ]) as [TestERC20, TestERC20]
     const callbackValidation = (await deployContract(wallet, 'TestCallbackValidation')) as TestCallbackValidation
 
     return {

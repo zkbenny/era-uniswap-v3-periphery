@@ -25,22 +25,13 @@ describe('NFTDescriptor', () => {
     tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
     nftDescriptor: Contract
   }> {
-    const nftDescriptorLibrary = await deployContract(wallet, 'NFTDescriptor')
-
-    const hre = require('hardhat')
-    hre.config.zksolc.settings.libraries = {
-      'contracts/libraries/NFTDescriptor.sol': {
-        NFTDescriptor: nftDescriptorLibrary.address,
-      },
-    }
-    await hre.run('compile')
     const nftDescriptor = await deployContract(wallet, 'NFTDescriptorTest')
-    const tokens = (await Promise.all([
-      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1']), // do not use maxu256 to avoid overflowing
-      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST2']),
-      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST3']),
-      deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST4']),
-    ])) as [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
+    const tokens = (await [
+      await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1']), // do not use maxu256 to avoid overflowing
+      await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST2']),
+      await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST3']),
+      await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST4']),
+    ]) as [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
     tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
     return {
       nftDescriptor,
@@ -50,6 +41,18 @@ describe('NFTDescriptor', () => {
 
   let nftDescriptor: Contract
   let tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata]
+
+  before('create fixture loader', async () => {
+    const nftDescriptorLibrary = await deployContract(wallets[0], 'NFTDescriptor')
+
+    const hre = require('hardhat')
+    hre.config.zksolc.settings.libraries = {
+      'contracts/libraries/NFTDescriptor.sol': {
+        NFTDescriptor: nftDescriptorLibrary.address,
+      },
+    }
+    await hre.run('compile')
+  })
 
   beforeEach('load fixture', async () => {
     ;({ nftDescriptor, tokens } = await nftDescriptorFixture(wallets))
