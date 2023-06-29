@@ -37,36 +37,25 @@ subtask(
 
 export default {
   networks: {
-    hardhat: {
-      allowUnlimitedContractSize: false,
-    },
-    mainnet: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
-    goerli: {
-      url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
-    kovan: {
-      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
-    },
     zkSyncLocalhost: {
-      url: "http://localhost:3050",
-      ethNetwork: "http://localhost:8545",
+      url: 'http://localhost:3050',
+      ethNetwork: 'http://localhost:8545',
       zksync: true,
     },
     zkSyncTestnet: {
-      url: "https://testnet.era.zksync.dev",
+      url: 'https://testnet.era.zksync.dev',
       ethNetwork: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
       zksync: true,
       verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
     },
+    zkSyncMainnet: {
+      url: 'https://mainnet.era.zksync.io',
+      ethNetwork: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      zksync: true,
+      verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification'
+    },
   },
+  defaultNetwork: 'zkSyncLocalhost',
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
@@ -85,7 +74,7 @@ export default {
     },
   },
   zksolc: {
-    version: "1.3.10",
+    version: "1.3.12",
     compilerSource: "binary",
     settings: {
       metadata: {
