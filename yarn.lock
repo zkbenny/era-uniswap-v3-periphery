@@ -1393,11 +1393,11 @@
 
 "@uniswap/v2-core@https://github.com/AntonD3/v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/AntonD3/v2-core.git#0ce72c31df25108e7301536085eca9f00460301e"
+  resolved "https://github.com/AntonD3/v2-core.git#bf8f5db636135f4fd11edc439d39acc60042c553"
 
 "@uniswap/v3-core@https://github.com/AntonD3/v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/AntonD3/v3-core.git#32a847aba1aa842012b11491a65cac86bef1b7a8"
+  resolved "https://github.com/AntonD3/v3-core.git#ad482a4cb91c86c97c63d99caa9c6267403e5d38"
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
