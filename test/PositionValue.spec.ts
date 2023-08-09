@@ -24,7 +24,7 @@ import { expect } from './shared/expect'
 import { abi as IUniswapV3PoolABI } from '@uniswap/v3-core/artifacts-zk/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
 
 import { deployContract, getWallets } from './shared/zkSyncUtils'
-import {Wallet} from "zksync-web3";
+import { Wallet } from 'zksync-web3'
 
 describe('PositionValue', async () => {
   const [...wallets] = getWallets()
@@ -39,9 +39,9 @@ describe('PositionValue', async () => {
     const positionValue = (await deployContract(wallet, 'PositionValueTest')) as PositionValueTest
 
     for (const token of tokens) {
-      await(await token.approve(nft.address, constants.MaxUint256)).wait()
-      await(await (token as any).connect(wallets[0]).approve(nft.address, constants.MaxUint256)).wait()
-      await(await token.transfer(wallets[0].address, expandTo18Decimals(1_000_000))).wait()
+      await (await token.approve(nft.address, constants.MaxUint256)).wait()
+      await (await (token as any).connect(wallets[0]).approve(nft.address, constants.MaxUint256)).wait()
+      await (await token.transfer(wallets[0].address, expandTo18Decimals(1_000_000))).wait()
     }
 
     return {
@@ -62,15 +62,16 @@ describe('PositionValue', async () => {
 
   let amountDesired: BigNumberish
 
-
   beforeEach(async () => {
     ;({ positionValue, tokens, nft, router, factory } = await positionValueCompleteFixture(wallets))
-    await(await nft.createAndInitializePoolIfNecessary(
-      tokens[0].address,
-      tokens[1].address,
-      FeeAmount.MEDIUM,
-      encodePriceSqrt(1, 1)
-    )).wait()
+    await (
+      await nft.createAndInitializePoolIfNecessary(
+        tokens[0].address,
+        tokens[1].address,
+        FeeAmount.MEDIUM,
+        encodePriceSqrt(1, 1)
+      )
+    ).wait()
 
     const poolAddress = computePoolAddress(factory.address, [tokens[0].address, tokens[1].address], FeeAmount.MEDIUM)
     pool = new Contract(poolAddress, IUniswapV3PoolABI, wallets[0] as any)
@@ -83,41 +84,47 @@ describe('PositionValue', async () => {
     beforeEach(async () => {
       amountDesired = expandTo18Decimals(100_000)
 
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const swapAmount = expandTo18Decimals(1_000)
-      await(await tokens[0].approve(router.address, swapAmount)).wait()
-      await(await tokens[1].approve(router.address, swapAmount)).wait()
+      await (await tokens[0].approve(router.address, swapAmount)).wait()
+      await (await tokens[1].approve(router.address, swapAmount)).wait()
 
       // accmuluate token0 fees
-      await(await router.exactInput({
-        recipient: wallets[0].address,
-        deadline: 1,
-        path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
-        amountIn: swapAmount,
-        amountOutMinimum: 0,
-      })).wait()
+      await (
+        await router.exactInput({
+          recipient: wallets[0].address,
+          deadline: 1,
+          path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
+          amountIn: swapAmount,
+          amountOutMinimum: 0,
+        })
+      ).wait()
 
       // accmuluate token1 fees
-      await(await router.exactInput({
-        recipient: wallets[0].address,
-        deadline: 1,
-        path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
-        amountIn: swapAmount,
-        amountOutMinimum: 0,
-      })).wait()
+      await (
+        await router.exactInput({
+          recipient: wallets[0].address,
+          deadline: 1,
+          path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
+          amountIn: swapAmount,
+          amountOutMinimum: 0,
+        })
+      ).wait()
 
       sqrtRatioX96 = (await pool.slot0()).sqrtPriceX96
     })
@@ -145,19 +152,21 @@ describe('PositionValue', async () => {
     })
 
     it('returns the correct values when price is in the middle of the range', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const principal = await positionValue.principal(nft.address, 1, sqrtRatioX96)
       expect(principal.amount0).to.equal('99999999999999999999999')
@@ -165,19 +174,21 @@ describe('PositionValue', async () => {
     })
 
     it('returns the correct values when range is below current price', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: -60,
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: -60,
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const principal = await positionValue.principal(nft.address, 1, sqrtRatioX96)
       expect(principal.amount0).to.equal('0')
@@ -185,19 +196,21 @@ describe('PositionValue', async () => {
     })
 
     it('returns the correct values when range is below current price', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: 60,
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: 60,
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const principal = await positionValue.principal(nft.address, 1, sqrtRatioX96)
       expect(principal.amount0).to.equal('99999999999999999999999')
@@ -205,19 +218,21 @@ describe('PositionValue', async () => {
     })
 
     it('returns the correct values when range is skewed above price', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: -6_000,
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: -6_000,
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const principal = await positionValue.principal(nft.address, 1, sqrtRatioX96)
       expect(principal.amount0).to.equal('99999999999999999999999')
@@ -225,19 +240,21 @@ describe('PositionValue', async () => {
     })
 
     it('returns the correct values when range is skewed below price', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: 6_000,
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: 6_000,
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       const principal = await positionValue.principal(nft.address, 1, sqrtRatioX96)
       expect(principal.amount0).to.equal('25917066770240321655335')
@@ -245,19 +262,21 @@ describe('PositionValue', async () => {
     })
 
     it('gas', async () => {
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
+      await (
+        await nft.mint({
+          token0: tokens[0].address,
+          token1: tokens[1].address,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          fee: FeeAmount.MEDIUM,
+          recipient: wallets[0].address,
+          amount0Desired: amountDesired,
+          amount1Desired: amountDesired,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 10,
+        })
+      ).wait()
 
       await snapshotGasCost(positionValue.principalGas(nft.address, 1, sqrtRatioX96))
     })
@@ -270,28 +289,12 @@ describe('PositionValue', async () => {
       amountDesired = expandTo18Decimals(100_000)
       tokenId = 2
 
-      await(await nft.mint({
-        token0: tokens[0].address,
-        token1: tokens[1].address,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        fee: FeeAmount.MEDIUM,
-        recipient: wallets[0].address,
-        amount0Desired: amountDesired,
-        amount1Desired: amountDesired,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 10,
-      })).wait()
-    })
-
-    describe('when price is within the position range', () => {
-      beforeEach(async () => {
-        await(await nft.mint({
+      await (
+        await nft.mint({
           token0: tokens[0].address,
           token1: tokens[1].address,
-          tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -1_000,
-          tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 1_000,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
           fee: FeeAmount.MEDIUM,
           recipient: wallets[0].address,
           amount0Desired: amountDesired,
@@ -299,29 +302,53 @@ describe('PositionValue', async () => {
           amount0Min: 0,
           amount1Min: 0,
           deadline: 10,
-        })).wait()
+        })
+      ).wait()
+    })
+
+    describe('when price is within the position range', () => {
+      beforeEach(async () => {
+        await (
+          await nft.mint({
+            token0: tokens[0].address,
+            token1: tokens[1].address,
+            tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -1_000,
+            tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 1_000,
+            fee: FeeAmount.MEDIUM,
+            recipient: wallets[0].address,
+            amount0Desired: amountDesired,
+            amount1Desired: amountDesired,
+            amount0Min: 0,
+            amount1Min: 0,
+            deadline: 10,
+          })
+        ).wait()
 
         const swapAmount = expandTo18Decimals(1_000)
-        await(await tokens[0].approve(router.address, swapAmount)).wait()
-        await(await tokens[1].approve(router.address, swapAmount)).wait()
+        await (await tokens[0].approve(router.address, swapAmount)).wait()
+        await (await tokens[1].approve(router.address, swapAmount)).wait()
 
         // accmuluate token0 fees
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
-          amountIn: swapAmount,
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
+            amountIn: swapAmount,
+            amountOutMinimum: 0,
+          })
+        ).wait()
 
         // accmuluate token1 fees
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
-          amountIn: swapAmount,
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
+            amountIn: swapAmount,
+            amountOutMinimum: 0,
+          })
+        ).wait()
       })
 
       it('return the correct amount of fees', async () => {
@@ -338,26 +365,30 @@ describe('PositionValue', async () => {
       })
 
       it('returns the correct amount of fees if tokensOwed fields are greater than 0', async () => {
-        await(await nft.increaseLiquidity({
-          tokenId: tokenId,
-          amount0Desired: 100,
-          amount1Desired: 100,
-          amount0Min: 0,
-          amount1Min: 0,
-          deadline: 1,
-        })).wait()
+        await (
+          await nft.increaseLiquidity({
+            tokenId: tokenId,
+            amount0Desired: 100,
+            amount1Desired: 100,
+            amount0Min: 0,
+            amount1Min: 0,
+            deadline: 1,
+          })
+        ).wait()
 
         const swapAmount = expandTo18Decimals(1_000)
-        await(await tokens[0].approve(router.address, swapAmount)).wait()
+        await (await tokens[0].approve(router.address, swapAmount)).wait()
 
         // accmuluate more token0 fees after clearing initial amount
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
-          amountIn: swapAmount,
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
+            amountIn: swapAmount,
+            amountOutMinimum: 0,
+          })
+        ).wait()
 
         const feesFromCollect = await nft.callStatic.collect({
           tokenId,
@@ -377,40 +408,46 @@ describe('PositionValue', async () => {
 
     describe('when price is below the position range', async () => {
       beforeEach(async () => {
-        await(await nft.mint({
-          token0: tokens[0].address,
-          token1: tokens[1].address,
-          tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -10,
-          tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 10,
-          fee: FeeAmount.MEDIUM,
-          recipient: wallets[0].address,
-          amount0Desired: expandTo18Decimals(10_000),
-          amount1Desired: expandTo18Decimals(10_000),
-          amount0Min: 0,
-          amount1Min: 0,
-          deadline: 10,
-        })).wait()
+        await (
+          await nft.mint({
+            token0: tokens[0].address,
+            token1: tokens[1].address,
+            tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -10,
+            tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 10,
+            fee: FeeAmount.MEDIUM,
+            recipient: wallets[0].address,
+            amount0Desired: expandTo18Decimals(10_000),
+            amount1Desired: expandTo18Decimals(10_000),
+            amount0Min: 0,
+            amount1Min: 0,
+            deadline: 10,
+          })
+        ).wait()
 
-        await(await tokens[0].approve(router.address, constants.MaxUint256)).wait()
-        await(await tokens[1].approve(router.address, constants.MaxUint256)).wait()
+        await (await tokens[0].approve(router.address, constants.MaxUint256)).wait()
+        await (await tokens[1].approve(router.address, constants.MaxUint256)).wait()
 
         // accumulate token1 fees
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
-          amountIn: expandTo18Decimals(1_000),
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
+            amountIn: expandTo18Decimals(1_000),
+            amountOutMinimum: 0,
+          })
+        ).wait()
 
         // accumulate token0 fees and push price below tickLower
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
-          amountIn: expandTo18Decimals(50_000),
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
+            amountIn: expandTo18Decimals(50_000),
+            amountOutMinimum: 0,
+          })
+        ).wait()
       })
 
       it('returns the correct amount of fees', async () => {
@@ -433,40 +470,46 @@ describe('PositionValue', async () => {
 
     describe('when price is above the position range', async () => {
       beforeEach(async () => {
-        await(await nft.mint({
-          token0: tokens[0].address,
-          token1: tokens[1].address,
-          tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -10,
-          tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 10,
-          fee: FeeAmount.MEDIUM,
-          recipient: wallets[0].address,
-          amount0Desired: expandTo18Decimals(10_000),
-          amount1Desired: expandTo18Decimals(10_000),
-          amount0Min: 0,
-          amount1Min: 0,
-          deadline: 10,
-        })).wait()
+        await (
+          await nft.mint({
+            token0: tokens[0].address,
+            token1: tokens[1].address,
+            tickLower: TICK_SPACINGS[FeeAmount.MEDIUM] * -10,
+            tickUpper: TICK_SPACINGS[FeeAmount.MEDIUM] * 10,
+            fee: FeeAmount.MEDIUM,
+            recipient: wallets[0].address,
+            amount0Desired: expandTo18Decimals(10_000),
+            amount1Desired: expandTo18Decimals(10_000),
+            amount0Min: 0,
+            amount1Min: 0,
+            deadline: 10,
+          })
+        ).wait()
 
-        await(await tokens[0].approve(router.address, constants.MaxUint256)).wait()
-        await(await tokens[1].approve(router.address, constants.MaxUint256)).wait()
+        await (await tokens[0].approve(router.address, constants.MaxUint256)).wait()
+        await (await tokens[1].approve(router.address, constants.MaxUint256)).wait()
 
         // accumulate token0 fees
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
-          amountIn: expandTo18Decimals(1_000),
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[0].address, tokens[1].address], [FeeAmount.MEDIUM]),
+            amountIn: expandTo18Decimals(1_000),
+            amountOutMinimum: 0,
+          })
+        ).wait()
 
         // accumulate token1 fees and push price above tickUpper
-        await(await router.exactInput({
-          recipient: wallets[0].address,
-          deadline: 1,
-          path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
-          amountIn: expandTo18Decimals(50_000),
-          amountOutMinimum: 0,
-        })).wait()
+        await (
+          await router.exactInput({
+            recipient: wallets[0].address,
+            deadline: 1,
+            path: encodePath([tokens[1].address, tokens[0].address], [FeeAmount.MEDIUM]),
+            amountIn: expandTo18Decimals(50_000),
+            amountOutMinimum: 0,
+          })
+        ).wait()
       })
 
       it('returns the correct amount of fees', async () => {

@@ -112,7 +112,7 @@ describe('OracleLibrary', () => {
       return deployContract(getWallets()[0], 'MockObservable', [
         [period, 0],
         tickCumulatives.map(BigNumber.from),
-        secondsPerLiqCumulatives.map(BigNumber.from)
+        secondsPerLiqCumulatives.map(BigNumber.from),
       ])
     }
   })
@@ -189,8 +189,6 @@ describe('OracleLibrary', () => {
   })
 
   describe('#getOldestObservationSecondsAgo', () => {
-    let mockObservationsFactory: ContractFactory
-
     // some empty tick values as this function does not use them
     const emptySPL = [0, 0, 0, 0]
     const emptyTickCumulatives = [0, 0, 0, 0]
@@ -213,7 +211,7 @@ describe('OracleLibrary', () => {
         observationCardinality,
         observationIndex,
         false,
-        emptyLiquidity
+        emptyLiquidity,
       ])
 
       var result = await oracle.getOldestObservationSecondsAgo(mockObservations.address)
@@ -280,7 +278,7 @@ describe('OracleLibrary', () => {
         observationCardinality,
         observationIndex,
         false,
-        emptyLiquidity
+        emptyLiquidity,
       ])
 
       await expect(oracle.getOldestObservationSecondsAgo(mockObservations.address)).to.be.revertedWith('NI')
@@ -300,7 +298,6 @@ describe('OracleLibrary', () => {
   })
 
   describe('#getBlockStartingTickAndLiquidity', () => {
-    let mockObservationsFactory: ContractFactory
     let mockObservations: Contract
     let blockTimestamps: number[]
     let tickCumulatives: number[]
@@ -312,10 +309,6 @@ describe('OracleLibrary', () => {
     let lastObservationCurrentTimestamp: boolean
     let liquidity: number
 
-    before('create mockObservationsFactory', async () => {
-      mockObservationsFactory = await ethers.getContractFactory('MockObservations')
-    })
-
     const deployMockObservationsContract = async () => {
       mockObservations = await deployContract(getWallets()[0], 'MockObservations', [
         blockTimestamps,
@@ -326,7 +319,7 @@ describe('OracleLibrary', () => {
         observationCardinality,
         observationIndex,
         lastObservationCurrentTimestamp,
-        liquidity
+        liquidity,
       ])
     }
 

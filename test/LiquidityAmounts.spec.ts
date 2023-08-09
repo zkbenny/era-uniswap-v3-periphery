@@ -1,7 +1,7 @@
 import { LiquidityAmountsTest } from '../typechain/LiquidityAmountsTest'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import { expect } from './shared/expect'
-import { getWallets, deployContract } from "./shared/zkSyncUtils";
+import { getWallets, deployContract } from './shared/zkSyncUtils'
 
 import snapshotGasCost from './shared/snapshotGasCost'
 

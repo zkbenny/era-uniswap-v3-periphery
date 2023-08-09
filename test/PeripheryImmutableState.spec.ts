@@ -14,7 +14,10 @@ describe('PeripheryImmutableState', () => {
   }> {
     const { weth9, factory } = await v3RouterFixture([wallet])
 
-    const state = (await deployContract(wallet, 'PeripheryImmutableStateTest', [factory.address, weth9.address])) as PeripheryImmutableStateTest
+    const state = (await deployContract(wallet, 'PeripheryImmutableStateTest', [
+      factory.address,
+      weth9.address,
+    ])) as PeripheryImmutableStateTest
 
     return {
       weth9,

@@ -2,19 +2,16 @@ import { constants } from 'ethers'
 import { Wallet, Contract } from 'zksync-web3'
 import * as zk from 'zksync-web3'
 import { expect } from './shared/expect'
-import {
-  MockTimeNonfungiblePositionManager,
-  TestERC20
-} from '../typechain'
-import completeFixture from './shared/completeFixture'
+import { MockTimeNonfungiblePositionManager, TestERC20 } from '../typechain'
+import completeFixture, { nftDescriptorLibrary } from './shared/completeFixture'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import { getMaxTick, getMinTick } from './shared/ticks'
 import { sortedTokens } from './shared/tokenSort'
 import { extractJSONFromURI } from './shared/extractJSONFromURI'
 
-import {deployContract, getWallets, loadArtifact} from './shared/zkSyncUtils'
-import hre from "hardhat";
+import { deployContract, getWallets, loadArtifact } from './shared/zkSyncUtils'
+import hre from 'hardhat'
 
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -117,27 +114,31 @@ describe('NonfungibleTokenPositionDescriptor', () => {
   describe('#tokenURI', () => {
     it('displays ETH as token symbol for WETH token', async () => {
       const [token0, token1] = sortedTokens(weth9, tokens[1])
-      await(await nft.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
-      await(await weth9.approve(nft.address, 100)).wait()
-      await(await tokens[1].approve(nft.address, 100)).wait()
-      await(await nft.mint({
-        token0: token0.address,
-        token1: token1.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        recipient: wallets[0].address,
-        amount0Desired: 100,
-        amount1Desired: 100,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 1,
-      })).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
+      await (await weth9.approve(nft.address, 100)).wait()
+      await (await tokens[1].approve(nft.address, 100)).wait()
+      await (
+        await nft.mint({
+          token0: token0.address,
+          token1: token1.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          recipient: wallets[0].address,
+          amount0Desired: 100,
+          amount1Desired: 100,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 1,
+        })
+      ).wait()
 
       const metadata = extractJSONFromURI(await nft.tokenURI(1))
       expect(metadata.name).to.match(/(\sETH\/TEST|TEST\/ETH)/)
@@ -147,27 +148,31 @@ describe('NonfungibleTokenPositionDescriptor', () => {
 
     it('displays returned token symbols when neither token is WETH ', async () => {
       const [token0, token1] = sortedTokens(tokens[2], tokens[1])
-      await(await nft.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
-      await(await tokens[1].approve(nft.address, 100)).wait()
-      await(await tokens[2].approve(nft.address, 100)).wait()
-      await(await nft.mint({
-        token0: token0.address,
-        token1: token1.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        recipient: wallets[0].address,
-        amount0Desired: 100,
-        amount1Desired: 100,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 1,
-      })).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
+      await (await tokens[1].approve(nft.address, 100)).wait()
+      await (await tokens[2].approve(nft.address, 100)).wait()
+      await (
+        await nft.mint({
+          token0: token0.address,
+          token1: token1.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          recipient: wallets[0].address,
+          amount0Desired: 100,
+          amount1Desired: 100,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 1,
+        })
+      ).wait()
 
       const metadata = extractJSONFromURI(await nft.tokenURI(1))
       expect(metadata.name).to.match(/TEST\/TEST/)
@@ -176,40 +181,47 @@ describe('NonfungibleTokenPositionDescriptor', () => {
 
     it('can render a different label for native currencies', async () => {
       const [token0, token1] = sortedTokens(weth9, tokens[1])
-      await(await nft.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
-      await(await weth9.approve(nft.address, 100)).wait()
-      await(await tokens[1].approve(nft.address, 100)).wait()
-      await(await nft.mint({
-        token0: token0.address,
-        token1: token1.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
-        recipient: wallets[0].address,
-        amount0Desired: 100,
-        amount1Desired: 100,
-        amount0Min: 0,
-        amount1Min: 0,
-        deadline: 1,
-      })).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
+      await (await weth9.approve(nft.address, 100)).wait()
+      await (await tokens[1].approve(nft.address, 100)).wait()
+      await (
+        await nft.mint({
+          token0: token0.address,
+          token1: token1.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          tickUpper: getMaxTick(TICK_SPACINGS[FeeAmount.MEDIUM]),
+          recipient: wallets[0].address,
+          amount0Desired: 100,
+          amount1Desired: 100,
+          amount0Min: 0,
+          amount1Min: 0,
+          deadline: 1,
+        })
+      ).wait()
 
-      const nftDescriptorLibrary = await deployContract(wallets[0], 'NFTDescriptor')
-      const hre = require('hardhat')
-      hre.config.zksolc.settings.libraries = {
-        'contracts/libraries/NFTDescriptor.sol': {
-          NFTDescriptor: nftDescriptorLibrary.address,
-        },
+      if (nftDescriptorLibrary === undefined) {
+        const nftDescriptorLibrary = await deployContract(wallets[0], 'NFTDescriptor')
+
+        const hre = require('hardhat')
+        hre.config.zksolc.settings.libraries = {
+          'contracts/libraries/NFTDescriptor.sol': {
+            NFTDescriptor: nftDescriptorLibrary.address,
+          },
+        }
+        await hre.run('compile')
       }
-      await hre.run('compile')
       const nftDescriptor = await deployContract(wallets[0], 'NonfungibleTokenPositionDescriptor', [
         weth9.address,
         // 'FUNNYMONEY' as a bytes32 string
-        '0x46554e4e594d4f4e455900000000000000000000000000000000000000000000'
+        '0x46554e4e594d4f4e455900000000000000000000000000000000000000000000',
       ])
 
       const metadata = extractJSONFromURI(await nftDescriptor.tokenURI(nft.address, 1))

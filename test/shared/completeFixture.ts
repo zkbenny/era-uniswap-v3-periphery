@@ -9,9 +9,8 @@ import {
 } from '../../typechain'
 import { Wallet, Contract } from 'zksync-web3'
 import { deployContract } from './zkSyncUtils'
-import hre from "hardhat";
 
-let nftDescriptorLibrary: Contract | undefined
+export let nftDescriptorLibrary: Contract | undefined
 
 async function completeFixture([wallet]: Wallet[]): Promise<{
   weth9: IWETH9
@@ -43,14 +42,14 @@ async function completeFixture([wallet]: Wallet[]): Promise<{
   const nftDescriptor = await deployContract(wallet, 'NonfungibleTokenPositionDescriptor', [
     tokens[0].address,
     // 'ETH' as a bytes32 string
-    '0x4554480000000000000000000000000000000000000000000000000000000000'
+    '0x4554480000000000000000000000000000000000000000000000000000000000',
   ])
 
-  const nft = await deployContract(wallet, 'MockTimeNonfungiblePositionManager', [
+  const nft = (await deployContract(wallet, 'MockTimeNonfungiblePositionManager', [
     factory.address,
     weth9.address,
-    nftDescriptor.address
-  ]) as MockTimeNonfungiblePositionManager
+    nftDescriptor.address,
+  ])) as MockTimeNonfungiblePositionManager
 
   tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
 

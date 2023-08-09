@@ -25,10 +25,10 @@ describe('QuoterV2', function () {
 
     // approve & fund wallets
     for (const token of tokens) {
-      await(await token.approve(router.address, constants.MaxUint256)).wait()
-      await(await token.approve(nft.address, constants.MaxUint256)).wait()
-      await(await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
-      await(await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
+      await (await token.approve(router.address, constants.MaxUint256)).wait()
+      await (await token.approve(nft.address, constants.MaxUint256)).wait()
+      await (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
+      await (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
     }
 
     quoter = (await deployContract(wallet, 'QuoterV2', [factory.address, weth9.address])) as QuoterV2
@@ -56,9 +56,9 @@ describe('QuoterV2', function () {
 
   describe('quotes', () => {
     beforeEach(async () => {
-      await(await createPool(nft, wallet, tokens[0].address, tokens[1].address)).wait()
-      await(await createPool(nft, wallet, tokens[1].address, tokens[2].address)).wait()
-      await(await createPoolWithMultiplePositions(nft, wallet, tokens[0].address, tokens[2].address)).wait()
+      await (await createPool(nft, wallet, tokens[0].address, tokens[1].address)).wait()
+      await (await createPool(nft, wallet, tokens[1].address, tokens[2].address)).wait()
+      await (await createPoolWithMultiplePositions(nft, wallet, tokens[0].address, tokens[2].address)).wait()
     })
 
     describe('#quoteExactInput', () => {
@@ -140,7 +140,7 @@ describe('QuoterV2', function () {
 
       it('0 -> 2 cross 0 tick, starting tick initialized', async () => {
         // Tick before 0, tick after -1. Tick 0 initialized.
-        await(await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
+        await (await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
 
         const {
           amountOut,
@@ -201,7 +201,7 @@ describe('QuoterV2', function () {
 
       it('2 -> 0 cross 0 tick, starting tick initialized', async () => {
         // Tick 0 initialized. Tick after = 1
-        await(await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
+        await (await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
 
         const {
           amountOut,
@@ -388,7 +388,7 @@ describe('QuoterV2', function () {
 
       it('0 -> 2 cross 0 tick starting tick initialized', async () => {
         // Tick before 0, tick after 1. Tick 0 initialized.
-        await(await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
+        await (await createPoolWithZeroTickInitialized(nft, wallet, tokens[0].address, tokens[2].address)).wait()
         const {
           amountIn,
           sqrtPriceX96AfterList,

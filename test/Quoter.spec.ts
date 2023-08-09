@@ -26,10 +26,10 @@ describe('Quoter', () => {
 
     // approve & fund wallets
     for (const token of tokens) {
-      await(await token.approve(router.address, constants.MaxUint256)).wait()
-      await(await token.approve(nft.address, constants.MaxUint256)).wait()
-      await(await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
-      await(await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
+      await (await token.approve(router.address, constants.MaxUint256)).wait()
+      await (await token.approve(nft.address, constants.MaxUint256)).wait()
+      await (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
+      await (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
     }
 
     quoter = (await deployContract(wallet, 'Quoter', [factory.address, weth9.address])) as Quoter
@@ -57,8 +57,8 @@ describe('Quoter', () => {
 
   describe('quotes', () => {
     beforeEach(async () => {
-      await(await createPool(nft, wallet, tokens[0].address, tokens[1].address)).wait()
-      await(await createPool(nft, wallet, tokens[1].address, tokens[2].address)).wait()
+      await (await createPool(nft, wallet, tokens[0].address, tokens[1].address)).wait()
+      await (await createPool(nft, wallet, tokens[1].address, tokens[2].address)).wait()
     })
 
     describe('#quoteExactInput', () => {

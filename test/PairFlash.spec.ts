@@ -20,8 +20,8 @@ import snapshotGasCost from './shared/snapshotGasCost'
 import { expect } from './shared/expect'
 import { getMaxTick, getMinTick } from './shared/ticks'
 import { computePoolAddress } from './shared/computePoolAddress'
-import {Wallet} from "zksync-web3";
-import {deployContract, getWallets} from "./shared/zkSyncUtils";
+import { Wallet } from 'zksync-web3'
+import { deployContract, getWallets } from './shared/zkSyncUtils'
 
 describe('PairFlash test', () => {
   // const provider = waffle.provider
@@ -39,7 +39,7 @@ describe('PairFlash test', () => {
     if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
       [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-    await(await nft.createAndInitializePoolIfNecessary(tokenAddressA, tokenAddressB, fee, price)).wait()
+    await (await nft.createAndInitializePoolIfNecessary(tokenAddressA, tokenAddressB, fee, price)).wait()
 
     const liquidityParams = {
       token0: tokenAddressA,
@@ -63,7 +63,11 @@ describe('PairFlash test', () => {
     const token0 = tokens[0]
     const token1 = tokens[1]
 
-    const flash = (await deployContract(wallet, 'PairFlash', [router.address, factory.address, weth9.address])) as PairFlash
+    const flash = (await deployContract(wallet, 'PairFlash', [
+      router.address,
+      factory.address,
+      weth9.address,
+    ])) as PairFlash
 
     const quoter = (await deployContract(wallet, 'Quoter', [factory.address, weth9.address])) as Quoter
 
@@ -82,11 +86,11 @@ describe('PairFlash test', () => {
   beforeEach('load fixture', async () => {
     ;({ factory, token0, token1, flash, nft, quoter } = await flashFixture(wallets))
 
-    await(await token0.approve(nft.address, MaxUint128)).wait()
-    await(await token1.approve(nft.address, MaxUint128)).wait()
-    await(await createPool(token0.address, token1.address, FeeAmount.LOW, encodePriceSqrt(5, 10))).wait()
-    await(await createPool(token0.address, token1.address, FeeAmount.MEDIUM, encodePriceSqrt(1, 1))).wait()
-    await(await createPool(token0.address, token1.address, FeeAmount.HIGH, encodePriceSqrt(20, 10))).wait()
+    await (await token0.approve(nft.address, MaxUint128)).wait()
+    await (await token1.approve(nft.address, MaxUint128)).wait()
+    await (await createPool(token0.address, token1.address, FeeAmount.LOW, encodePriceSqrt(5, 10))).wait()
+    await (await createPool(token0.address, token1.address, FeeAmount.MEDIUM, encodePriceSqrt(1, 1))).wait()
+    await (await createPool(token0.address, token1.address, FeeAmount.HIGH, encodePriceSqrt(20, 10))).wait()
   })
 
   describe('flash', () => {
