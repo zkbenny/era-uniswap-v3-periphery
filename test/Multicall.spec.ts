@@ -1,4 +1,3 @@
-import { Wallet } from 'zksync-web3'
 import { TestMulticall } from '../typechain/TestMulticall'
 import { expect } from './shared/expect'
 import { getWallets, deployContract } from './shared/zkSyncUtils'
@@ -38,10 +37,12 @@ describe('Multicall', async () => {
     })
 
     it('msg.value used twice', async () => {
-      await (await multicall.multicall(
-        [multicall.interface.encodeFunctionData('pays'), multicall.interface.encodeFunctionData('pays')],
-        { value: 3 }
-      )).wait()
+      await (
+        await multicall.multicall(
+          [multicall.interface.encodeFunctionData('pays'), multicall.interface.encodeFunctionData('pays')],
+          { value: 3 }
+        )
+      ).wait()
       expect(await multicall.paid()).to.eq(6)
     })
 

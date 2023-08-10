@@ -38,15 +38,15 @@ describe('V3Migrator', () => {
     const { factory: factoryV2 } = await v2FactoryFixture([wallet])
 
     const token = tokens[0]
-    await(await token.approve(factoryV2.address, constants.MaxUint256)).wait()
-    await(await weth9.deposit({ value: 10000 })).wait()
-    await(await weth9.approve(nft.address, constants.MaxUint256)).wait()
+    await (await token.approve(factoryV2.address, constants.MaxUint256)).wait()
+    await (await weth9.deposit({ value: 10000 })).wait()
+    await (await weth9.approve(nft.address, constants.MaxUint256)).wait()
 
     // deploy the migrator
     const migrator = (await deployContract(wallet, 'V3Migrator', [
       factory.address,
       weth9.address,
-      nft.address
+      nft.address,
     ])) as V3Migrator
 
     return {
@@ -100,22 +100,22 @@ describe('V3Migrator', () => {
     })
 
     beforeEach('add V2 liquidity', async () => {
-      await(await factoryV2.createPair(token.address, weth9.address)).wait()
+      await (await factoryV2.createPair(token.address, weth9.address)).wait()
 
       const pairAddress = await factoryV2.getPair(token.address, weth9.address)
 
       pair = new Contract(pairAddress, PAIR_V2_ABI, wallet as any) as IUniswapV2Pair
 
-      await(await token.transfer(pair.address, 10000)).wait()
-      await(await weth9.transfer(pair.address, 10000)).wait()
+      await (await token.transfer(pair.address, 10000)).wait()
+      await (await weth9.transfer(pair.address, 10000)).wait()
 
-      await(await pair.mint(wallet.address)).wait()
+      await (await pair.mint(wallet.address)).wait()
 
       expect(await pair.balanceOf(wallet.address)).to.be.eq(expectedLiquidity)
     })
 
     it('fails if v3 pool is not initialized', async () => {
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
       await expect(
         migrator.migrate({
           pair: pair.address,
@@ -137,29 +137,33 @@ describe('V3Migrator', () => {
 
     it('works once v3 pool is initialized', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
-      await(await migrator.migrate({
-        pair: pair.address,
-        liquidityToMigrate: expectedLiquidity,
-        percentageToMigrate: 100,
-        token0: tokenLower ? token.address : weth9.address,
-        token1: tokenLower ? weth9.address : token.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(FeeAmount.MEDIUM),
-        tickUpper: getMaxTick(FeeAmount.MEDIUM),
-        amount0Min: 9000,
-        amount1Min: 9000,
-        recipient: wallet.address,
-        deadline: 1,
-        refundAsETH: false,
-      })).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (
+        await migrator.migrate({
+          pair: pair.address,
+          liquidityToMigrate: expectedLiquidity,
+          percentageToMigrate: 100,
+          token0: tokenLower ? token.address : weth9.address,
+          token1: tokenLower ? weth9.address : token.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(FeeAmount.MEDIUM),
+          tickUpper: getMaxTick(FeeAmount.MEDIUM),
+          amount0Min: 9000,
+          amount1Min: 9000,
+          recipient: wallet.address,
+          deadline: 1,
+          refundAsETH: false,
+        })
+      ).wait()
 
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(9000)
@@ -171,32 +175,36 @@ describe('V3Migrator', () => {
 
     it('works for partial', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
       const tokenBalanceBefore = await token.balanceOf(wallet.address)
       const weth9BalanceBefore = await weth9.balanceOf(wallet.address)
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
-      await(await migrator.migrate({
-        pair: pair.address,
-        liquidityToMigrate: expectedLiquidity,
-        percentageToMigrate: 50,
-        token0: tokenLower ? token.address : weth9.address,
-        token1: tokenLower ? weth9.address : token.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(FeeAmount.MEDIUM),
-        tickUpper: getMaxTick(FeeAmount.MEDIUM),
-        amount0Min: 4500,
-        amount1Min: 4500,
-        recipient: wallet.address,
-        deadline: 1,
-        refundAsETH: false,
-      })).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (
+        await migrator.migrate({
+          pair: pair.address,
+          liquidityToMigrate: expectedLiquidity,
+          percentageToMigrate: 50,
+          token0: tokenLower ? token.address : weth9.address,
+          token1: tokenLower ? weth9.address : token.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(FeeAmount.MEDIUM),
+          tickUpper: getMaxTick(FeeAmount.MEDIUM),
+          amount0Min: 4500,
+          amount1Min: 4500,
+          recipient: wallet.address,
+          deadline: 1,
+          refundAsETH: false,
+        })
+      ).wait()
 
       const tokenBalanceAfter = await token.balanceOf(wallet.address)
       const weth9BalanceAfter = await weth9.balanceOf(wallet.address)
@@ -214,32 +222,36 @@ describe('V3Migrator', () => {
 
     it('double the price', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(2, 1)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(2, 1)
+        )
+      ).wait()
 
       const tokenBalanceBefore = await token.balanceOf(wallet.address)
       const weth9BalanceBefore = await weth9.balanceOf(wallet.address)
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
-      await(await migrator.migrate({
-        pair: pair.address,
-        liquidityToMigrate: expectedLiquidity,
-        percentageToMigrate: 100,
-        token0: tokenLower ? token.address : weth9.address,
-        token1: tokenLower ? weth9.address : token.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(FeeAmount.MEDIUM),
-        tickUpper: getMaxTick(FeeAmount.MEDIUM),
-        amount0Min: 4500,
-        amount1Min: 8999,
-        recipient: wallet.address,
-        deadline: 1,
-        refundAsETH: false,
-      })).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (
+        await migrator.migrate({
+          pair: pair.address,
+          liquidityToMigrate: expectedLiquidity,
+          percentageToMigrate: 100,
+          token0: tokenLower ? token.address : weth9.address,
+          token1: tokenLower ? weth9.address : token.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(FeeAmount.MEDIUM),
+          tickUpper: getMaxTick(FeeAmount.MEDIUM),
+          amount0Min: 4500,
+          amount1Min: 8999,
+          recipient: wallet.address,
+          deadline: 1,
+          refundAsETH: false,
+        })
+      ).wait()
 
       const tokenBalanceAfter = await token.balanceOf(wallet.address)
       const weth9BalanceAfter = await weth9.balanceOf(wallet.address)
@@ -263,32 +275,36 @@ describe('V3Migrator', () => {
 
     it('half the price', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 2)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 2)
+        )
+      ).wait()
 
       const tokenBalanceBefore = await token.balanceOf(wallet.address)
       const weth9BalanceBefore = await weth9.balanceOf(wallet.address)
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
-      await(await migrator.migrate({
-        pair: pair.address,
-        liquidityToMigrate: expectedLiquidity,
-        percentageToMigrate: 100,
-        token0: tokenLower ? token.address : weth9.address,
-        token1: tokenLower ? weth9.address : token.address,
-        fee: FeeAmount.MEDIUM,
-        tickLower: getMinTick(FeeAmount.MEDIUM),
-        tickUpper: getMaxTick(FeeAmount.MEDIUM),
-        amount0Min: 8999,
-        amount1Min: 4500,
-        recipient: wallet.address,
-        deadline: 1,
-        refundAsETH: false,
-      })).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (
+        await migrator.migrate({
+          pair: pair.address,
+          liquidityToMigrate: expectedLiquidity,
+          percentageToMigrate: 100,
+          token0: tokenLower ? token.address : weth9.address,
+          token1: tokenLower ? weth9.address : token.address,
+          fee: FeeAmount.MEDIUM,
+          tickLower: getMinTick(FeeAmount.MEDIUM),
+          tickUpper: getMaxTick(FeeAmount.MEDIUM),
+          amount0Min: 8999,
+          amount1Min: 4500,
+          recipient: wallet.address,
+          deadline: 1,
+          refundAsETH: false,
+        })
+      ).wait()
 
       const tokenBalanceAfter = await token.balanceOf(wallet.address)
       const weth9BalanceAfter = await weth9.balanceOf(wallet.address)
@@ -312,16 +328,18 @@ describe('V3Migrator', () => {
 
     it('double the price - as ETH', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(2, 1)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(2, 1)
+        )
+      ).wait()
 
       const tokenBalanceBefore = await token.balanceOf(wallet.address)
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
       await expect(
         migrator.migrate({
           pair: pair.address,
@@ -361,16 +379,18 @@ describe('V3Migrator', () => {
 
     it('half the price - as ETH', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 2)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 2)
+        )
+      ).wait()
 
       const tokenBalanceBefore = await token.balanceOf(wallet.address)
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
       await expect(
         migrator.migrate({
           pair: pair.address,
@@ -410,14 +430,16 @@ describe('V3Migrator', () => {
 
     it('gas', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
-      await(await migrator.createAndInitializePoolIfNecessary(
-        token0.address,
-        token1.address,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await migrator.createAndInitializePoolIfNecessary(
+          token0.address,
+          token1.address,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
-      await(await pair.approve(migrator.address, expectedLiquidity)).wait()
+      await (await pair.approve(migrator.address, expectedLiquidity)).wait()
       await snapshotGasCost(
         migrator.migrate({
           pair: pair.address,

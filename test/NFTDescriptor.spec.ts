@@ -12,7 +12,6 @@ import fs from 'fs'
 import isSvg from 'is-svg'
 import { Wallet, Contract } from 'zksync-web3'
 import { deployContract, getWallets } from './shared/zkSyncUtils'
-import hre from "hardhat";
 
 const TEN = BigNumber.from(10)
 const LOWEST_SQRT_RATIO = 4310618292

@@ -4,7 +4,7 @@ import completeFixture from './shared/completeFixture'
 import { expect } from './shared/expect'
 import { TestERC20, TestCallbackValidation } from '../typechain'
 import { FeeAmount } from './shared/constants'
-import { deployContract, getWallets } from "./shared/zkSyncUtils";
+import { deployContract, getWallets } from './shared/zkSyncUtils'
 
 describe('CallbackValidation', () => {
   const [nonpairAddr, ...wallets] = getWallets()
@@ -38,7 +38,7 @@ describe('CallbackValidation', () => {
 
   it('reverts when called from an address other than the associated UniswapV3Pool', async () => {
     expect(
-        (callbackValidation as any)
+      (callbackValidation as any)
         .connect(nonpairAddr)
         .verifyCallback(factory.address, tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
     ).to.be.reverted

@@ -1,4 +1,3 @@
-import { Fixture } from 'ethereum-waffle'
 import { constants } from 'ethers'
 import { Wallet } from 'zksync-web3'
 import { MockTimeNonfungiblePositionManager, Quoter, TestERC20 } from '../typechain'
@@ -56,12 +55,14 @@ describe('Quoter', () => {
       if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
         [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-      await(await nft.createAndInitializePoolIfNecessary(
-        tokenAddressA,
-        tokenAddressB,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          tokenAddressA,
+          tokenAddressB,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
       const liquidityParams = {
         token0: tokenAddressA,
@@ -81,8 +82,8 @@ describe('Quoter', () => {
     }
 
     beforeEach(async () => {
-      await(await createPool(tokens[0].address, tokens[1].address)).wait()
-      await(await createPool(tokens[1].address, tokens[2].address)).wait()
+      await (await createPool(tokens[0].address, tokens[1].address)).wait()
+      await (await createPool(tokens[1].address, tokens[2].address)).wait()
     })
 
     describe('#quoteExactInput', () => {

@@ -41,12 +41,14 @@ describe('SwapRouter gas tests', () => {
       if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
         [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-      await(await nft.createAndInitializePoolIfNecessary(
-        tokenAddressA,
-        tokenAddressB,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(100005, 100000) // we don't want to cross any ticks
-      )).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          tokenAddressA,
+          tokenAddressB,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(100005, 100000) // we don't want to cross any ticks
+        )
+      ).wait()
 
       const liquidityParams = {
         token0: tokenAddressA,
@@ -66,15 +68,15 @@ describe('SwapRouter gas tests', () => {
     }
 
     async function createPoolWETH9(tokenAddress: string) {
-      await(await weth9.deposit({ value: liquidity * 2 })).wait()
-      await(await weth9.approve(nft.address, constants.MaxUint256)).wait()
+      await (await weth9.deposit({ value: liquidity * 2 })).wait()
+      await (await weth9.approve(nft.address, constants.MaxUint256)).wait()
       return createPool(weth9.address, tokenAddress)
     }
 
     // create pools
-    await(await createPool(tokens[0].address, tokens[1].address)).wait()
-    await(await createPool(tokens[1].address, tokens[2].address)).wait()
-    await(await createPoolWETH9(tokens[0].address)).wait()
+    await (await createPool(tokens[0].address, tokens[1].address)).wait()
+    await (await createPool(tokens[1].address, tokens[2].address)).wait()
+    await (await createPoolWETH9(tokens[0].address)).wait()
 
     const poolAddresses = await Promise.all([
       factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM),
@@ -226,12 +228,12 @@ describe('SwapRouter gas tests', () => {
 
   // TODO should really throw this in the fixture
   beforeEach('intialize feeGrowthGlobals', async () => {
-    await(await exactInput([tokens[0].address, tokens[1].address], 1, 0)).wait()
-    await(await exactInput([tokens[1].address, tokens[0].address], 1, 0)).wait()
-    await(await exactInput([tokens[1].address, tokens[2].address], 1, 0)).wait()
-    await(await exactInput([tokens[2].address, tokens[1].address], 1, 0)).wait()
-    await(await exactInput([tokens[0].address, weth9.address], 1, 0)).wait()
-    await(await exactInput([weth9.address, tokens[0].address], 1, 0)).wait()
+    await (await exactInput([tokens[0].address, tokens[1].address], 1, 0)).wait()
+    await (await exactInput([tokens[1].address, tokens[0].address], 1, 0)).wait()
+    await (await exactInput([tokens[1].address, tokens[2].address], 1, 0)).wait()
+    await (await exactInput([tokens[2].address, tokens[1].address], 1, 0)).wait()
+    await (await exactInput([tokens[0].address, weth9.address], 1, 0)).wait()
+    await (await exactInput([weth9.address, tokens[0].address], 1, 0)).wait()
   })
 
   beforeEach('ensure feeGrowthGlobals are >0', async () => {
@@ -269,8 +271,10 @@ describe('SwapRouter gas tests', () => {
     it('0 -> 1 minimal', async () => {
       const callee = await deployContract(wallet, 'TestUniswapV3Callee')
 
-      await(await (tokens[0] as any).connect(trader).approve(callee.address, constants.MaxUint256)).wait()
-      await snapshotGasCost((callee as any).connect(trader).swapExact0For1(pools[0].address, 2, trader.address, '4295128740'))
+      await (await (tokens[0] as any).connect(trader).approve(callee.address, constants.MaxUint256)).wait()
+      await snapshotGasCost(
+        (callee as any).connect(trader).swapExact0For1(pools[0].address, 2, trader.address, '4295128740')
+      )
     })
 
     it('0 -> 1 -> 2', async () => {
