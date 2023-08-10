@@ -1,6 +1,6 @@
 import { BigNumber, constants, ContractTransaction } from 'ethers'
 import { Wallet, Contract } from 'zksync-web3'
-import{ provider } from './shared/zkSyncUtils'
+import { provider } from './shared/zkSyncUtils'
 import { IWETH9, MockTimeNonfungiblePositionManager, MockTimeSwapRouter, TestERC20 } from '../typechain'
 import completeFixture from './shared/completeFixture'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
@@ -28,10 +28,10 @@ describe('SwapRouter', function () {
 
     // approve & fund wallets
     for (const token of tokens) {
-      await(await token.approve(router.address, constants.MaxUint256)).wait()
-      await(await token.approve(nft.address, constants.MaxUint256)).wait()
-      await(await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
-      await(await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
+      await (await token.approve(router.address, constants.MaxUint256)).wait()
+      await (await token.approve(nft.address, constants.MaxUint256)).wait()
+      await (await (token as any).connect(trader).approve(router.address, constants.MaxUint256)).wait()
+      await (await token.transfer(trader.address, expandTo18Decimals(1_000_000))).wait()
     }
 
     return {
@@ -99,12 +99,14 @@ describe('SwapRouter', function () {
       if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
         [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-      await(await nft.createAndInitializePoolIfNecessary(
-        tokenAddressA,
-        tokenAddressB,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          tokenAddressA,
+          tokenAddressB,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
       const liquidityParams = {
         token0: tokenAddressA,
@@ -124,14 +126,14 @@ describe('SwapRouter', function () {
     }
 
     async function createPoolWETH9(tokenAddress: string) {
-      await(await weth9.deposit({ value: liquidity })).wait()
-      await(await weth9.approve(nft.address, constants.MaxUint256)).wait()
+      await (await weth9.deposit({ value: liquidity })).wait()
+      await (await weth9.approve(nft.address, constants.MaxUint256)).wait()
       return createPool(weth9.address, tokenAddress)
     }
 
     beforeEach('create 0-1 and 1-2 pools', async () => {
-      await(await createPool(tokens[0].address, tokens[1].address)).wait()
-      await(await createPool(tokens[1].address, tokens[2].address)).wait()
+      await (await createPool(tokens[0].address, tokens[1].address)).wait()
+      await (await createPool(tokens[1].address, tokens[2].address)).wait()
     })
 
     describe('#exactInput', () => {
@@ -159,7 +161,9 @@ describe('SwapRouter', function () {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountOutMinimum += 1
-        await expect((router as any).connect(trader).exactInput(params, { value })).to.be.revertedWith('Too little received')
+        await expect((router as any).connect(trader).exactInput(params, { value })).to.be.revertedWith(
+          'Too little received'
+        )
         params.amountOutMinimum -= 1
 
         // optimized for the gas test
@@ -176,7 +180,7 @@ describe('SwapRouter', function () {
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactInput(tokens.slice(0, 2).map((token) => token.address))).wait()
+          await (await exactInput(tokens.slice(0, 2).map((token) => token.address))).wait()
 
           // get balances after
           const poolAfter = await getBalances(pool)
@@ -195,12 +199,14 @@ describe('SwapRouter', function () {
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactInput(
-            tokens
-              .slice(0, 2)
-              .reverse()
-              .map((token) => token.address)
-          )).wait()
+          await (
+            await exactInput(
+              tokens
+                .slice(0, 2)
+                .reverse()
+                .map((token) => token.address)
+            )
+          ).wait()
 
           // get balances after
           const poolAfter = await getBalances(pool)
@@ -217,11 +223,13 @@ describe('SwapRouter', function () {
         it('0 -> 1 -> 2', async () => {
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactInput(
-            tokens.map((token) => token.address),
-            5,
-            1
-          )).wait()
+          await (
+            await exactInput(
+              tokens.map((token) => token.address),
+              5,
+              1
+            )
+          ).wait()
 
           const traderAfter = await getBalances(trader.address)
 
@@ -232,7 +240,7 @@ describe('SwapRouter', function () {
         it('2 -> 1 -> 0', async () => {
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactInput(tokens.map((token) => token.address).reverse(), 5, 1)).wait()
+          await (await exactInput(tokens.map((token) => token.address).reverse(), 5, 1)).wait()
 
           const traderAfter = await getBalances(trader.address)
 
@@ -278,7 +286,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
@@ -318,8 +326,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
-            await(await createPoolWETH9(tokens[1].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -410,7 +418,7 @@ describe('SwapRouter', function () {
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
-        await(await exactInputSingle(tokens[0].address, tokens[1].address)).wait()
+        await (await exactInputSingle(tokens[0].address, tokens[1].address)).wait()
 
         // get balances after
         const poolAfter = await getBalances(pool)
@@ -429,7 +437,7 @@ describe('SwapRouter', function () {
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
-        await(await exactInputSingle(tokens[1].address, tokens[0].address)).wait()
+        await (await exactInputSingle(tokens[1].address, tokens[0].address)).wait()
 
         // get balances after
         const poolAfter = await getBalances(pool)
@@ -444,7 +452,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
@@ -472,8 +480,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
-            await(await createPoolWETH9(tokens[1].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -524,7 +532,9 @@ describe('SwapRouter', function () {
 
         // ensure that the swap fails if the limit is any tighter
         params.amountInMaximum -= 1
-        await expect((router as any).connect(trader).exactOutput(params, { value })).to.be.revertedWith('Too much requested')
+        await expect((router as any).connect(trader).exactOutput(params, { value })).to.be.revertedWith(
+          'Too much requested'
+        )
         params.amountInMaximum += 1
 
         return (router as any).connect(trader).multicall(data, { value })
@@ -538,7 +548,7 @@ describe('SwapRouter', function () {
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactOutput(tokens.slice(0, 2).map((token) => token.address))).wait()
+          await (await exactOutput(tokens.slice(0, 2).map((token) => token.address))).wait()
 
           // get balances after
           const poolAfter = await getBalances(pool)
@@ -557,12 +567,14 @@ describe('SwapRouter', function () {
           const poolBefore = await getBalances(pool)
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactOutput(
-            tokens
-              .slice(0, 2)
-              .reverse()
-              .map((token) => token.address)
-          )).wait()
+          await (
+            await exactOutput(
+              tokens
+                .slice(0, 2)
+                .reverse()
+                .map((token) => token.address)
+            )
+          ).wait()
 
           // get balances after
           const poolAfter = await getBalances(pool)
@@ -579,11 +591,13 @@ describe('SwapRouter', function () {
         it('0 -> 1 -> 2', async () => {
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactOutput(
-            tokens.map((token) => token.address),
-            1,
-            5
-          )).wait()
+          await (
+            await exactOutput(
+              tokens.map((token) => token.address),
+              1,
+              5
+            )
+          ).wait()
 
           const traderAfter = await getBalances(trader.address)
 
@@ -594,7 +608,7 @@ describe('SwapRouter', function () {
         it('2 -> 1 -> 0', async () => {
           const traderBefore = await getBalances(trader.address)
 
-          await(await exactOutput(tokens.map((token) => token.address).reverse(), 1, 5)).wait()
+          await (await exactOutput(tokens.map((token) => token.address).reverse(), 1, 5)).wait()
 
           const traderAfter = await getBalances(trader.address)
 
@@ -634,7 +648,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
@@ -674,8 +688,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
-            await(await createPoolWETH9(tokens[1].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -763,7 +777,7 @@ describe('SwapRouter', function () {
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
-        await(await exactOutputSingle(tokens[0].address, tokens[1].address)).wait()
+        await (await exactOutputSingle(tokens[0].address, tokens[1].address)).wait()
 
         // get balances after
         const poolAfter = await getBalances(pool)
@@ -782,7 +796,7 @@ describe('SwapRouter', function () {
         const poolBefore = await getBalances(pool)
         const traderBefore = await getBalances(trader.address)
 
-        await(await exactOutputSingle(tokens[1].address, tokens[0].address)).wait()
+        await (await exactOutputSingle(tokens[1].address, tokens[0].address)).wait()
 
         // get balances after
         const poolAfter = await getBalances(pool)
@@ -797,7 +811,7 @@ describe('SwapRouter', function () {
       describe('ETH input', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
           })
 
           it('WETH9 -> 0', async () => {
@@ -825,8 +839,8 @@ describe('SwapRouter', function () {
       describe('ETH output', () => {
         describe('WETH9', () => {
           beforeEach(async () => {
-            await(await createPoolWETH9(tokens[0].address)).wait()
-            await(await createPoolWETH9(tokens[1].address)).wait()
+            await (await createPoolWETH9(tokens[0].address)).wait()
+            await (await createPoolWETH9(tokens[1].address)).wait()
           })
 
           it('0 -> WETH9', async () => {
@@ -876,7 +890,7 @@ describe('SwapRouter', function () {
           ]),
         ]
 
-        await(await (router as any).connect(trader).multicall(data)).wait()
+        await (await (router as any).connect(trader).multicall(data)).wait()
 
         const balance = await tokens[1].balanceOf(feeRecipient)
         expect(balance.eq(1)).to.be.eq(true)
@@ -884,7 +898,7 @@ describe('SwapRouter', function () {
 
       it('#unwrapWETH9WithFee', async () => {
         const startBalance = await provider.getBalance(feeRecipient)
-        await(await createPoolWETH9(tokens[0].address)).wait()
+        await (await createPoolWETH9(tokens[0].address)).wait()
 
         const amountOutMinimum = 100
         const params = {
@@ -905,7 +919,7 @@ describe('SwapRouter', function () {
           ]),
         ]
 
-        await(await (router as any).connect(trader).multicall(data)).wait()
+        await (await (router as any).connect(trader).multicall(data)).wait()
         const endBalance = await provider.getBalance(feeRecipient)
         expect(endBalance.sub(startBalance).eq(1)).to.be.eq(true)
       })

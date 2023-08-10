@@ -12,7 +12,6 @@ import fs from 'fs'
 import isSvg from 'is-svg'
 import { Wallet, Contract } from 'zksync-web3'
 import { deployContract, getWallets } from './shared/zkSyncUtils'
-import hre from "hardhat";
 
 const TEN = BigNumber.from(10)
 const LOWEST_SQRT_RATIO = 4310618292
@@ -28,10 +27,26 @@ describe('NFTDescriptor', () => {
     const nftDescriptor = await deployContract(wallet, 'NFTDescriptorTest')
     // const TestERC20Metadata = deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1'])
     const tokens: [TestERC20Metadata, TestERC20Metadata, TestERC20Metadata, TestERC20Metadata] = [
-      (await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST1'])) as TestERC20Metadata, // do not use maxu256 to avoid overflowing
-      (await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST2'])) as TestERC20Metadata,
-      (await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST3'])) as TestERC20Metadata,
-      (await deployContract(wallet, 'TestERC20Metadata', [constants.MaxUint256.div(2), 'Test ERC20', 'TEST4'])) as TestERC20Metadata,
+      (await deployContract(wallet, 'TestERC20Metadata', [
+        constants.MaxUint256.div(2),
+        'Test ERC20',
+        'TEST1',
+      ])) as TestERC20Metadata, // do not use maxu256 to avoid overflowing
+      (await deployContract(wallet, 'TestERC20Metadata', [
+        constants.MaxUint256.div(2),
+        'Test ERC20',
+        'TEST2',
+      ])) as TestERC20Metadata,
+      (await deployContract(wallet, 'TestERC20Metadata', [
+        constants.MaxUint256.div(2),
+        'Test ERC20',
+        'TEST3',
+      ])) as TestERC20Metadata,
+      (await deployContract(wallet, 'TestERC20Metadata', [
+        constants.MaxUint256.div(2),
+        'Test ERC20',
+        'TEST4',
+      ])) as TestERC20Metadata,
     ]
     tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
     return {

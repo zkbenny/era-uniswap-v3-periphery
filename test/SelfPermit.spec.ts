@@ -43,15 +43,17 @@ describe('SelfPermit', () => {
     const { v, r, s } = await getPermitSignature(wallet, token, other.address, value)
 
     expect(await token.allowance(wallet.address, other.address)).to.be.eq(0)
-    await(await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
-      wallet.address,
-      other.address,
-      value,
-      constants.MaxUint256,
-      v,
-      r,
-      s
-    )).wait()
+    await (
+      await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
+        wallet.address,
+        other.address,
+        value,
+        constants.MaxUint256,
+        v,
+        r,
+        s
+      )
+    ).wait()
     expect(await token.allowance(wallet.address, other.address)).to.be.eq(value)
   })
 
@@ -62,7 +64,7 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, value)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await selfPermitTest.selfPermit(token.address, value, constants.MaxUint256, v, r, s)).wait()
+      await (await selfPermitTest.selfPermit(token.address, value, constants.MaxUint256, v, r, s)).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(value)
     })
 
@@ -70,15 +72,17 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, value)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
-        wallet.address,
-        selfPermitTest.address,
-        value,
-        constants.MaxUint256,
-        v,
-        r,
-        s
-      )).wait()
+      await (
+        await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
+          wallet.address,
+          selfPermitTest.address,
+          value,
+          constants.MaxUint256,
+          v,
+          r,
+          s
+        )
+      ).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(value)
 
       await expect(selfPermitTest.selfPermit(token.address, value, constants.MaxUint256, v, r, s)).to.be.revertedWith(
@@ -94,7 +98,7 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, value)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await selfPermitTest.selfPermitIfNecessary(token.address, value, constants.MaxUint256, v, r, s)).wait()
+      await (await selfPermitTest.selfPermitIfNecessary(token.address, value, constants.MaxUint256, v, r, s)).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(value)
     })
 
@@ -102,18 +106,20 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, value)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
-        wallet.address,
-        selfPermitTest.address,
-        value,
-        constants.MaxUint256,
-        v,
-        r,
-        s
-      )).wait()
+      await (
+        await token['permit(address,address,uint256,uint256,uint8,bytes32,bytes32)'](
+          wallet.address,
+          selfPermitTest.address,
+          value,
+          constants.MaxUint256,
+          v,
+          r,
+          s
+        )
+      ).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(value)
 
-      await(await selfPermitTest.selfPermitIfNecessary(token.address, value, constants.MaxUint256, v, r, s)).wait()
+      await (await selfPermitTest.selfPermitIfNecessary(token.address, value, constants.MaxUint256, v, r, s)).wait()
     })
   })
 
@@ -132,16 +138,18 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, constants.MaxUint256)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await token['permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)'](
-        wallet.address,
-        selfPermitTest.address,
-        0,
-        constants.MaxUint256,
-        true,
-        v,
-        r,
-        s
-      )).wait()
+      await (
+        await token['permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)'](
+          wallet.address,
+          selfPermitTest.address,
+          0,
+          constants.MaxUint256,
+          true,
+          v,
+          r,
+          s
+        )
+      ).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(constants.MaxUint256)
 
       await expect(
@@ -165,7 +173,7 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, constants.MaxUint256)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await token.approve(selfPermitTest.address, constants.MaxUint256)).wait()
+      await (await token.approve(selfPermitTest.address, constants.MaxUint256)).wait()
       await expect(
         selfPermitTest.selfPermitAllowedIfNecessary(token.address, 0, constants.MaxUint256, v, r, s)
       ).to.not.emit(token, 'Approval')
@@ -176,19 +184,21 @@ describe('SelfPermit', () => {
       const { v, r, s } = await getPermitSignature(wallet, token, selfPermitTest.address, constants.MaxUint256)
 
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(0)
-      await(await token['permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)'](
-        wallet.address,
-        selfPermitTest.address,
-        0,
-        constants.MaxUint256,
-        true,
-        v,
-        r,
-        s
-      )).wait()
+      await (
+        await token['permit(address,address,uint256,uint256,bool,uint8,bytes32,bytes32)'](
+          wallet.address,
+          selfPermitTest.address,
+          0,
+          constants.MaxUint256,
+          true,
+          v,
+          r,
+          s
+        )
+      ).wait()
       expect(await token.allowance(wallet.address, selfPermitTest.address)).to.be.eq(constants.MaxUint256)
 
-      await(await selfPermitTest.selfPermitAllowedIfNecessary(token.address, 0, constants.MaxUint256, v, r, s)).wait()
+      await (await selfPermitTest.selfPermitAllowedIfNecessary(token.address, 0, constants.MaxUint256, v, r, s)).wait()
     })
   })
 })

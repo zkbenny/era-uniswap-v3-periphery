@@ -21,7 +21,7 @@ describe('TickLens', () => {
     const { factory, tokens, nft } = await completeFixture([wallet])
 
     for (const token of tokens) {
-      await(await token.approve(nft.address, constants.MaxUint256)).wait()
+      await (await token.approve(nft.address, constants.MaxUint256)).wait()
     }
 
     return {
@@ -51,12 +51,14 @@ describe('TickLens', () => {
       if (tokenAddressA.toLowerCase() > tokenAddressB.toLowerCase())
         [tokenAddressA, tokenAddressB] = [tokenAddressB, tokenAddressA]
 
-      await(await nft.createAndInitializePoolIfNecessary(
-        tokenAddressA,
-        tokenAddressB,
-        FeeAmount.MEDIUM,
-        encodePriceSqrt(1, 1)
-      )).wait()
+      await (
+        await nft.createAndInitializePoolIfNecessary(
+          tokenAddressA,
+          tokenAddressB,
+          FeeAmount.MEDIUM,
+          encodePriceSqrt(1, 1)
+        )
+      ).wait()
 
       const liquidityParams = {
         token0: tokenAddressA,
@@ -92,12 +94,12 @@ describe('TickLens', () => {
 
       const { liquidity } = await nft.callStatic.mint(mintParams)
 
-      await(await nft.mint(mintParams)).wait()
+      await (await nft.mint(mintParams)).wait()
       return liquidity.toNumber()
     }
 
     beforeEach(async () => {
-      await(await createPool(tokens[0].address, tokens[1].address)).wait()
+      await (await createPool(tokens[0].address, tokens[1].address)).wait()
       poolAddress = computePoolAddress(factory.address, [tokens[0].address, tokens[1].address], FeeAmount.MEDIUM)
     })
 
@@ -214,6 +216,6 @@ describe('TickLens', () => {
           getTickBitmapIndex(0, TICK_SPACINGS[FeeAmount.MEDIUM])
         )
       )
-    })//.timeout(300_000)
+    }) //.timeout(300_000)
   })
 })

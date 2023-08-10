@@ -1,14 +1,12 @@
 import { expect } from 'chai'
-import { ethers, waffle } from 'hardhat'
 import { BigNumber, constants, ContractFactory } from 'ethers'
 import { Wallet } from 'zksync-web3'
 import { OracleTest, TestERC20 } from '../typechain'
 import { expandTo18Decimals } from './shared/expandTo18Decimals'
 import snapshotGasCost from './shared/snapshotGasCost'
-import { deployContract, getWallets, } from '../test/shared/zkSyncUtils'
+import { deployContract, getWallets } from '../test/shared/zkSyncUtils'
 
 describe('OracleLibrary', () => {
-  let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
   let tokens: TestERC20[]
   let oracle: OracleTest
 
@@ -44,7 +42,11 @@ describe('OracleLibrary', () => {
     it('correct output when tick is 0', async () => {
       const period = 3
       const tickCumulatives = [BigNumber.from(12), BigNumber.from(12)]
-      const mockObservable =  await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       expect(oracleTick).to.equal(BigNumber.from(0))
@@ -53,7 +55,11 @@ describe('OracleLibrary', () => {
     it('correct output for positive tick', async () => {
       const period = 3
       const tickCumulatives = [BigNumber.from(7), BigNumber.from(12)]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       // Always round to negative infinity
@@ -64,7 +70,11 @@ describe('OracleLibrary', () => {
     it('correct output for negative tick', async () => {
       const period = 3
       const tickCumulatives = [BigNumber.from(-7), BigNumber.from(-12)]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       // Always round to negative infinity
@@ -75,7 +85,11 @@ describe('OracleLibrary', () => {
     it('correct rounding for .5 negative tick', async () => {
       const period = 4
       const tickCumulatives = [BigNumber.from(-10), BigNumber.from(-12)]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       // Always round to negative infinity
@@ -86,7 +100,11 @@ describe('OracleLibrary', () => {
     it('correct output for tick cumulatives across overflow boundaries', async () => {
       const period = 4
       const tickCumulatives = [BigNumber.from(-100), BigNumber.from('36028797018963967')]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       // Always round to negative infinity
@@ -97,7 +115,11 @@ describe('OracleLibrary', () => {
     it('correct output for tick cumulatives across underflow boundaries', async () => {
       const period = 4
       const tickCumulatives = [BigNumber.from(100), BigNumber.from('-36028797018963967')]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
       const oracleTick = await oracle.consult(mockObservable.address, period)
 
       // Always round to negative infinity
@@ -108,7 +130,11 @@ describe('OracleLibrary', () => {
     it('gas test', async () => {
       const period = 3
       const tickCumulatives = [BigNumber.from(7), BigNumber.from(12)]
-      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [[period, 0], tickCumulatives, [0, 0]])
+      const mockObservable = await deployContract(getWallets()[0], 'MockObservable', [
+        [period, 0],
+        tickCumulatives,
+        [0, 0],
+      ])
 
       await snapshotGasCost(oracle.getGasCostOfConsult(mockObservable.address, period))
     })
