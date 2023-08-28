@@ -1468,11 +1468,11 @@
 
 "@uniswap/v2-core@https://github.com/uniswap-zksync/era-uniswap-v2-core.git#v1.0.1-zksync-era":
   version "1.0.1"
-  resolved "https://github.com/uniswap-zksync/era-uniswap-v2-core.git#0ae8c6ae315c1efa77c2831da15553ef9fda4a5f"
+  resolved "https://github.com/uniswap-zksync/era-uniswap-v2-core.git#052cc8b612b49fed4fb388586b63eaed2b80d936"
 
 "@uniswap/v3-core@https://github.com/uniswap-zksync/era-uniswap-v3-core.git#v1.0.0-zksync-era":
   version "1.0.0"
-  resolved "https://github.com/uniswap-zksync/era-uniswap-v3-core.git#bba8fa7fc6f24810dea7384a4d8ca4e550e6f386"
+  resolved "https://github.com/uniswap-zksync/era-uniswap-v3-core.git#9ba7b052ab83b6a2a7120eeff04e6efe050e881d"
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"
