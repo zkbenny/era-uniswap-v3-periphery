@@ -31,7 +31,7 @@ subtask(TASK_COMPILE_SOLIDITY_GET_SOURCE_PATHS, async (_, { config }, runSuper) 
 
 export default {
   networks: {
-    zkSyncLocalhost: {
+    zkSyncTestNode: {
       url: 'http://localhost:8011',
       ethNetwork: '',
       zksync: true,
@@ -49,23 +49,9 @@ export default {
       verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
-  defaultNetwork: 'zkSyncLocalhost',
-  etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
+  defaultNetwork: 'zkSyncTestNode',
   solidity: {
     version: '0.7.6',
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 1_000_000,
-      },
-      metadata: {
-        bytecodeHash: 'none',
-      },
-    },
   },
   zksolc: {
     version: '1.3.13',
