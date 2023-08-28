@@ -9,7 +9,6 @@ import {
 } from '../../typechain'
 import { Wallet, Contract } from 'zksync-web3'
 import { deployContract } from './zkSyncUtils'
-import hre from 'hardhat'
 
 let nftDescriptorLibrary: Contract | undefined
 
